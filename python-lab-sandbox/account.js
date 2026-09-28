@@ -1,11 +1,12 @@
 import { firebaseConfig } from './firebase-config.js';
 
-const DOMAIN = '@glm.edu.co';
 const VERSION = '12.19.0';
+const EMAIL_LINK_KEY = 'pythonLabEmailForSignIn';
 const account = {
   configured: Boolean(firebaseConfig.apiKey && firebaseConfig.authDomain &&
     firebaseConfig.projectId && firebaseConfig.appId),
-  ready: false
+  ready: false,
+  emailLinkPending: false
 };
 window.pythonLabAccount = account;
 
@@ -39,10 +40,41 @@ async function initializeAccounts() {
   const provider = new authApi.GoogleAuthProvider();
   provider.setCustomParameters({ hd: 'glm.edu.co', prompt: 'select_account' });
 
+  account.emailLinkPending = authApi.isSignInWithEmailLink(auth, window.location.href);
+
+  account.sendEmailLink = async (email) => {
+    const schoolEmail = String(email || '').trim().toLowerCase();
+    if (!institutionalEmail(schoolEmail)) {
+      throw new Error('Enter your @glm.edu.co email address.');
+    }
+    await authApi.sendSignInLinkToEmail(auth, schoolEmail, {
+      url: window.location.origin + window.location.pathname,
+      handleCodeInApp: true
+    });
+    localStorage.setItem(EMAIL_LINK_KEY, schoolEmail);
+  };
+
+  account.completeEmailLink = async (email) => {
+    if (!account.emailLinkPending) throw new Error('Open the sign-in link sent to your email first.');
+    const schoolEmail = String(email || '').trim().toLowerCase();
+    if (!institutionalEmail(schoolEmail)) {
+      throw new Error('Enter the @glm.edu.co email address that received the link.');
+    }
+    const result = await authApi.signInWithEmailLink(auth, schoolEmail, window.location.href);
+    if (!result.user.emailVerified || !institutionalEmail(result.user.email)) {
+      await authApi.signOut(auth);
+      throw new Error('This email address is not a verified GLM account.');
+    }
+    localStorage.removeItem(EMAIL_LINK_KEY);
+    window.history.replaceState({}, document.title, window.location.pathname);
+    account.emailLinkPending = false;
+    announce('pythonlab-ready');
+  };
+
   function signedInUser() {
     const user = auth.currentUser;
     if (!user || !user.emailVerified || !institutionalEmail(user.email)) {
-      throw new Error('Sign in with a verified @glm.edu.co Google account.');
+      throw new Error('Sign in with your verified @glm.edu.co school email.');
     }
     return user;
   }
@@ -106,4 +138,16 @@ async function initializeAccounts() {
 
   account.ready = true;
   announce('pythonlab-ready');
+  if (account.emailLinkPending) {
+    const savedEmail = localStorage.getItem(EMAIL_LINK_KEY);
+    if (savedEmail) {
+      try {
+        await account.completeEmailLink(savedEmail);
+      } catch (error) {
+        announce('pythonlab-error', 'Could not finish email sign-in: ' + (error.message || String(error)));
+      }
+    } else {
+      announce('pythonlab-email-link-pending');
+    }
+  }
 }

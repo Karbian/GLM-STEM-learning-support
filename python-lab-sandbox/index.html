@@ -1216,10 +1216,15 @@
 
       <div class="quick-field">
         <label for="studentEmail">GLM email</label>
-        <input id="studentEmail" type="email" readonly placeholder="Sign in with Google">
+        <input id="studentEmail" type="email" readonly placeholder="Verified email appears here">
       </div>
 
-      <button class="primary" id="signInButton" onclick="signInStudent()">Sign in with Google</button>
+      <div class="quick-field" id="loginEmailField">
+        <label for="loginEmail">Sign in with school email</label>
+        <input id="loginEmail" type="email" autocomplete="email" placeholder="name@glm.edu.co">
+      </div>
+      <button class="primary" id="emailLinkButton" onclick="useEmailLink()">Email me a sign-in link</button>
+      <button class="secondary" id="signInButton" onclick="signInStudent()">Use Google account</button>
       <button class="secondary" id="signOutButton" onclick="signOutStudent()" hidden>Sign out</button>
       <button class="secondary" id="profileButton" onclick="saveStudentProfile()" hidden>Save name</button>
       <button class="secondary" id="loadProgressButton" onclick="loadMyProgress()" hidden>Load progress</button>
@@ -1314,7 +1319,7 @@
           <div class="line-numbers" id="lineNumbers">1</div>
           <div class="editor-layer">
             <pre id="highlight"></pre>
-            <textarea id="editor" spellcheck="false" aria-label="Python code editor"></textarea>
+            <textarea id="editor" spellcheck="false" aria-label="Python code editor" placeholder="Write your own Python solution here."></textarea>
           </div>
         </div>
 
@@ -1351,7 +1356,7 @@ Type one Python command at a time. Your variables and functions stay available d
           <div class="panel-body">
             <div class="exercise-list" id="exerciseList"></div>
             <div class="progress-box" id="exerciseDetails">
-              Select an exercise to see the instructions and starter code.
+              Select an exercise, then write and test your own solution.
             </div>
             <div class="mini-grid" style="margin-top:10px;">
               
@@ -1360,20 +1365,6 @@ Type one Python command at a time. Your variables and functions stay available d
           </div>
         </section>
 
-        <section class="card">
-          <div class="card-title">
-            <h2>Quick Examples</h2>
-          </div>
-          <div class="panel-body">
-            <div class="mini-grid">
-              <button class="secondary small-button" onclick="loadExample('basics')">Basic</button>
-              <button class="secondary small-button" onclick="loadExample('data')">Data + Plot</button>
-              <button class="secondary small-button" onclick="loadExample('gui')">GUI</button>
-              <button class="secondary small-button" onclick="copyCode()">Copy code</button>
-            </div>
-            <p class="hint" style="margin-bottom:0;">Examples replace the code currently in the editor.</p>
-          </div>
-        </section>
       </aside>
     </main>
 
@@ -1465,6 +1456,7 @@ Type one Python command at a time. Your variables and functions stay available d
 
     const studentNameInput = document.getElementById('studentName');
     const studentEmailInput = document.getElementById('studentEmail');
+    const loginEmailInput = document.getElementById('loginEmail');
     const profilePill = document.getElementById('profilePill');
     const exerciseList = document.getElementById('exerciseList');
     const exerciseDetails = document.getElementById('exerciseDetails');
@@ -1507,7 +1499,7 @@ Type one Python command at a time. Your variables and functions stay available d
     "objective": "Use print() and arithmetic operators to calculate a result.",
     "instructions": "Calculate and display the number of minutes in one week.",
     "engine": "brython",
-    "starter": "minutes = 7 * 24 * 60\nprint(\"Minutes in a week:\", minutes)",
+    "starter": "",
     "testInputs": [],
     "expectedContains": [
       "10080"
@@ -1526,12 +1518,9 @@ Type one Python command at a time. Your variables and functions stay available d
     "objective": "Write a simple program with several print() instructions.",
     "instructions": "Print your name, your birth date, and your favorite color on three separate lines.",
     "engine": "brython",
-    "starter": "print(\"My name is Student Name.\")\nprint(\"I was born on January 1.\")\nprint(\"My favorite color is blue.\")",
+    "starter": "",
     "testInputs": [],
-    "expectedContains": [
-      "My name",
-      "favorite color"
-    ],
+    "expectedContains": [],
     "requiredCode": [
       "print"
     ]
@@ -1545,12 +1534,9 @@ Type one Python command at a time. Your variables and functions stay available d
     "objective": "Assign values to variables and reuse them in output.",
     "instructions": "Create variables for a course name and a teacher name, then print a sentence using both variables.",
     "engine": "brython",
-    "starter": "course = \"Python Lab\"\nteacher = \"GLM Teacher\"\nprint(course, \"with\", teacher)",
+    "starter": "",
     "testInputs": [],
-    "expectedContains": [
-      "Python Lab",
-      "GLM Teacher"
-    ],
+    "expectedContains": [],
     "requiredCode": [
       "=",
       "print"
@@ -1565,13 +1551,9 @@ Type one Python command at a time. Your variables and functions stay available d
     "objective": "Show that a variable can store a new value later in the program.",
     "instructions": "Store a first score, print it, change the score, and print the updated score.",
     "engine": "brython",
-    "starter": "score = 3\nprint(\"First score:\", score)\nscore = 5\nprint(\"Updated score:\", score)",
+    "starter": "",
     "testInputs": [],
-    "expectedContains": [
-      "First score",
-      "Updated score",
-      "5"
-    ],
+    "expectedContains": [],
     "requiredCode": [
       "score",
       "="
@@ -1584,9 +1566,9 @@ Type one Python command at a time. Your variables and functions stay available d
     "topic": "Basic math",
     "title": "Rectangle area",
     "objective": "Use multiplication to solve a math problem in Python.",
-    "instructions": "Ask for width and height. Print the area. Test inputs are 5 and 3, so the output must include 15.",
+    "instructions": "Ask for width and height, then calculate and print the rectangle area. Test with 5 and 3.",
     "engine": "brython",
-    "starter": "width = int(input(\"Width: \"))\nheight = int(input(\"Height: \"))\narea = width * height\nprint(\"Area:\", area)",
+    "starter": "",
     "testInputs": [
       "5",
       "3"
@@ -1597,7 +1579,6 @@ Type one Python command at a time. Your variables and functions stay available d
     ],
     "requiredCode": [
       "input",
-      "int",
       "*"
     ]
   },
@@ -1610,7 +1591,7 @@ Type one Python command at a time. Your variables and functions stay available d
     "objective": "Use exponent and modulo operators.",
     "instructions": "Print 2 to the power of 8 and the remainder when 17 is divided by 5.",
     "engine": "brython",
-    "starter": "power_result = 2 ** 8\nremainder = 17 % 5\nprint(\"Power:\", power_result)\nprint(\"Remainder:\", remainder)",
+    "starter": "",
     "testInputs": [],
     "expectedContains": [
       "256",
@@ -1628,9 +1609,9 @@ Type one Python command at a time. Your variables and functions stay available d
     "topic": "Types of data",
     "title": "Next year age",
     "objective": "Convert text input into an integer before doing arithmetic.",
-    "instructions": "Ask for an age and print the age for next year. With test input 12, the output must include 13.",
+    "instructions": "Ask for an age and print the age next year. Test with 12.",
     "engine": "brython",
-    "starter": "age_text = input(\"Age: \")\nage = int(age_text)\nprint(\"Next year:\", age + 1)",
+    "starter": "",
     "testInputs": [
       "12"
     ],
@@ -1650,9 +1631,9 @@ Type one Python command at a time. Your variables and functions stay available d
     "topic": "Types of data",
     "title": "Decimal conversion",
     "objective": "Convert text input into a float before calculating.",
-    "instructions": "Ask for a decimal price and add 2.5 to it. With test input 15.0, the output must include 17.5.",
+    "instructions": "Ask for a decimal price and add 2.5. Test with 15.0.",
     "engine": "brython",
-    "starter": "price = float(input(\"Price: \"))\nnew_price = price + 2.5\nprint(\"New price:\", new_price)",
+    "starter": "",
     "testInputs": [
       "15.0"
     ],
@@ -1671,14 +1652,14 @@ Type one Python command at a time. Your variables and functions stay available d
     "topic": "Input",
     "title": "Personal greeting",
     "objective": "Combine input() and print() to create interactive output.",
-    "instructions": "Ask for a name and print a greeting. With test input Ana, the output must include Hello, Ana.",
+    "instructions": "Ask for a name and print a personal greeting. Test with Ana.",
     "engine": "brython",
-    "starter": "name = input(\"Write your name: \")\nprint(\"Hello, \" + name)",
+    "starter": "",
     "testInputs": [
       "Ana"
     ],
     "expectedContains": [
-      "Hello, Ana"
+      "ana"
     ],
     "requiredCode": [
       "input",
@@ -1692,9 +1673,9 @@ Type one Python command at a time. Your variables and functions stay available d
     "topic": "Input",
     "title": "Tip calculator",
     "objective": "Use numeric input and arithmetic to calculate a final value.",
-    "instructions": "Ask for a bill and a tip percentage. Print the final total. Test inputs are 40000 and 10, so the result must include 44000.",
+    "instructions": "Ask for a bill and a tip percentage, then print the final total. Test with 40000 and 10.",
     "engine": "brython",
-    "starter": "bill = float(input(\"Bill: \"))\ntip_percent = float(input(\"Tip percent: \"))\ntotal = bill + bill * tip_percent / 100\nprint(\"Total:\", total)",
+    "starter": "",
     "testInputs": [
       "40000",
       "10"
@@ -1704,8 +1685,7 @@ Type one Python command at a time. Your variables and functions stay available d
     ],
     "requiredCode": [
       "input",
-      "float",
-      "/"
+      "float"
     ]
   },
   {
@@ -1717,7 +1697,7 @@ Type one Python command at a time. Your variables and functions stay available d
     "objective": "Use the classroom gui module to build a simple interface.",
     "instructions": "Create a GUI with a title, explanatory text, an input box, and a button. Print GUI ready when it is built.",
     "engine": "brython",
-    "starter": "import gui\n\ngui.clear()\ngui.title(\"Student Card\")\ngui.text(\"Write your name and click the button.\")\ngui.input(\"nameBox\", \"Name\")\n\ndef show_name():\n    name = gui.value(\"nameBox\")\n    gui.text(\"Student: \" + name)\n\ngui.button(\"Show name\", show_name)\nprint(\"GUI ready\")",
+    "starter": "",
     "testInputs": [],
     "expectedContains": [
       "GUI ready"
@@ -1737,7 +1717,7 @@ Type one Python command at a time. Your variables and functions stay available d
     "objective": "Design a GUI that collects two values and reacts to a button click.",
     "instructions": "Create two input boxes and a button that adds the values typed by the user. Print Calculator ready.",
     "engine": "brython",
-    "starter": "import gui\n\ngui.clear()\ngui.title(\"Mini Calculator\")\ngui.input(\"a\", \"First number\")\ngui.input(\"b\", \"Second number\")\n\ndef add_numbers():\n    a = float(gui.value(\"a\"))\n    b = float(gui.value(\"b\"))\n    gui.text(\"Result: \" + str(a + b))\n\ngui.button(\"Add\", add_numbers)\nprint(\"Calculator ready\")",
+    "starter": "",
     "testInputs": [],
     "expectedContains": [
       "Calculator ready"
@@ -1757,7 +1737,7 @@ Type one Python command at a time. Your variables and functions stay available d
     "objective": "Use if/else to choose between two outputs.",
     "instructions": "Ask for a score. If it is 3.5 or higher, print Pass. Otherwise, print Revise. Test input is 3.5.",
     "engine": "brython",
-    "starter": "score = float(input(\"Score: \"))\nif score >= 3.5:\n    print(\"Pass\")\nelse:\n    print(\"Revise\")",
+    "starter": "",
     "testInputs": [
       "3.5"
     ],
@@ -1777,15 +1757,14 @@ Type one Python command at a time. Your variables and functions stay available d
     "topic": "Decisions",
     "title": "Largest number",
     "objective": "Compare two values and print the greater one.",
-    "instructions": "Ask for two numbers and print the largest. Test inputs are 8 and 5, so the output must include 8.",
+    "instructions": "Ask for two numbers and print the larger one. Test with 8 and 5.",
     "engine": "brython",
-    "starter": "a = int(input(\"First number: \"))\nb = int(input(\"Second number: \"))\nif a > b:\n    print(\"Largest:\", a)\nelse:\n    print(\"Largest:\", b)",
+    "starter": "",
     "testInputs": [
       "8",
       "5"
     ],
     "expectedContains": [
-      "Largest",
       "8"
     ],
     "requiredCode": [
@@ -1803,7 +1782,7 @@ Type one Python command at a time. Your variables and functions stay available d
     "objective": "Use a for loop with range().",
     "instructions": "Print the numbers from 1 to 10 using a loop.",
     "engine": "brython",
-    "starter": "for number in range(1, 11):\n    print(number)",
+    "starter": "",
     "testInputs": [],
     "expectedContains": [
       "1",
@@ -1821,9 +1800,9 @@ Type one Python command at a time. Your variables and functions stay available d
     "topic": "Loops",
     "title": "Sum from 1 to 100",
     "objective": "Use a loop and accumulator variable.",
-    "instructions": "Use a loop to calculate the sum of the numbers from 1 to 100. The output must include 5050.",
+    "instructions": "Use a loop to calculate and print the sum of the numbers from 1 to 100.",
     "engine": "brython",
-    "starter": "total = 0\nfor number in range(1, 101):\n    total = total + number\nprint(\"Total:\", total)",
+    "starter": "",
     "testInputs": [],
     "expectedContains": [
       "5050"
@@ -1843,7 +1822,7 @@ Type one Python command at a time. Your variables and functions stay available d
     "objective": "Use comments to explain code without changing execution.",
     "instructions": "Write a program with at least two comments and one print statement that displays Ready.",
     "engine": "brython",
-    "starter": "# This program shows a status message.\n# Comments help humans understand the code.\nprint(\"Ready\")",
+    "starter": "",
     "testInputs": [],
     "expectedContains": [
       "Ready"
@@ -1862,7 +1841,7 @@ Type one Python command at a time. Your variables and functions stay available d
     "objective": "Document the purpose of variables and calculations.",
     "instructions": "Convert 30 Celsius to Fahrenheit and add comments explaining the formula.",
     "engine": "brython",
-    "starter": "# Store the Celsius temperature.\ncelsius = 30\n# Convert Celsius to Fahrenheit.\nfahrenheit = celsius * 9 / 5 + 32\nprint(\"Fahrenheit:\", fahrenheit)",
+    "starter": "",
     "testInputs": [],
     "expectedContains": [
       "86"
@@ -1879,15 +1858,13 @@ Type one Python command at a time. Your variables and functions stay available d
     "topic": "Game time",
     "title": "Tiny adventure",
     "objective": "Combine input, conditionals, and output in a small game scene.",
-    "instructions": "Ask the player to choose left or right. With test input left, the game must print that the player found a key.",
+    "instructions": "Ask the player to choose left or right. Give a different message for each path. Test with left.",
     "engine": "brython",
-    "starter": "choice = input(\"Go left or right? \").lower()\nif choice == \"left\":\n    print(\"You found a key!\")\nelse:\n    print(\"You found a wall.\")",
+    "starter": "",
     "testInputs": [
       "left"
     ],
-    "expectedContains": [
-      "key"
-    ],
+    "expectedContains": [],
     "requiredCode": [
       "input",
       "if",
@@ -1901,13 +1878,11 @@ Type one Python command at a time. Your variables and functions stay available d
     "topic": "Game time",
     "title": "Score keeper",
     "objective": "Use variables to update and display game score.",
-    "instructions": "Create a score variable, add points three times, and print the final score. The output must include 30.",
+    "instructions": "Create a score variable, add points three times, and print the final score.",
     "engine": "brython",
-    "starter": "score = 0\nscore = score + 10\nscore = score + 10\nscore = score + 10\nprint(\"Score:\", score)",
+    "starter": "",
     "testInputs": [],
-    "expectedContains": [
-      "30"
-    ],
+    "expectedContains": [],
     "requiredCode": [
       "score",
       "+"
@@ -1920,9 +1895,9 @@ Type one Python command at a time. Your variables and functions stay available d
     "topic": "Nested and variable loops",
     "title": "Small multiplication table",
     "objective": "Use nested loops to generate repeated patterns.",
-    "instructions": "Use nested loops to print a multiplication table from 1 to 3. The output must include 3 x 3 = 9.",
+    "instructions": "Use nested loops to print a multiplication table from 1 to 3.",
     "engine": "brython",
-    "starter": "for row in range(1, 4):\n    for col in range(1, 4):\n        print(row, \"x\", col, \"=\", row * col)",
+    "starter": "",
     "testInputs": [],
     "expectedContains": [
       "3 x 3 = 9"
@@ -1942,14 +1917,13 @@ Type one Python command at a time. Your variables and functions stay available d
     "objective": "Use nested loops to build a text pattern.",
     "instructions": "Print a rectangle with 3 rows and 4 stars per row.",
     "engine": "brython",
-    "starter": "for row in range(3):\n    line = \"\"\n    for col in range(4):\n        line = line + \"*\"\n    print(line)",
+    "starter": "",
     "testInputs": [],
     "expectedContains": [
-      "****"
+      "**** **** ****"
     ],
     "requiredCode": [
-      "for",
-      "line"
+      "for"
     ]
   },
   {
@@ -1959,9 +1933,9 @@ Type one Python command at a time. Your variables and functions stay available d
     "topic": "Lists",
     "title": "Average from a list",
     "objective": "Store values in a list and calculate with them.",
-    "instructions": "Create a list with scores 3, 4, and 5. Print the average. The output must include 4.",
+    "instructions": "Create a list with scores 3, 4, and 5. Calculate and print the average.",
     "engine": "brython",
-    "starter": "scores = [3, 4, 5]\naverage = sum(scores) / len(scores)\nprint(\"Average:\", average)",
+    "starter": "",
     "testInputs": [],
     "expectedContains": [
       "4"
@@ -1981,7 +1955,7 @@ Type one Python command at a time. Your variables and functions stay available d
     "objective": "Use append() and a loop to work with list items.",
     "instructions": "Start with a list containing apples and bananas, append bread, and print each item.",
     "engine": "brython",
-    "starter": "shopping = [\"apples\", \"bananas\"]\nshopping.append(\"bread\")\nfor item in shopping:\n    print(item)",
+    "starter": "",
     "testInputs": [],
     "expectedContains": [
       "apples",
@@ -2002,7 +1976,7 @@ Type one Python command at a time. Your variables and functions stay available d
     "objective": "Define and call a function that returns a value.",
     "instructions": "Create a function named square that receives a number and returns its square. Print square(5).",
     "engine": "brython",
-    "starter": "def square(number):\n    return number * number\n\nprint(square(5))",
+    "starter": "",
     "testInputs": [],
     "expectedContains": [
       "25"
@@ -2021,7 +1995,7 @@ Type one Python command at a time. Your variables and functions stay available d
     "objective": "Create a function with more than one argument.",
     "instructions": "Create a function named total_price(price, quantity) that returns price times quantity. Print total_price(1200, 3).",
     "engine": "brython",
-    "starter": "def total_price(price, quantity):\n    return price * quantity\n\nprint(\"Total:\", total_price(1200, 3))",
+    "starter": "",
     "testInputs": [],
     "expectedContains": [
       "3600"
@@ -2040,11 +2014,10 @@ Type one Python command at a time. Your variables and functions stay available d
     "objective": "Create a simple class with attributes and a method.",
     "instructions": "Create a Pet class with a name and a speak method. Create a pet named Luna and make it speak.",
     "engine": "brython",
-    "starter": "class Pet:\n    def __init__(self, name):\n        self.name = name\n\n    def speak(self):\n        print(self.name, \"says hello!\")\n\npet = Pet(\"Luna\")\npet.speak()",
+    "starter": "",
     "testInputs": [],
     "expectedContains": [
-      "Luna",
-      "hello"
+      "Luna"
     ],
     "requiredCode": [
       "class Pet",
@@ -2061,10 +2034,9 @@ Type one Python command at a time. Your variables and functions stay available d
     "objective": "Use object attributes to describe a real-world item.",
     "instructions": "Create a Book class with title and pages. Print a sentence about a book with 120 pages.",
     "engine": "brython",
-    "starter": "class Book:\n    def __init__(self, title, pages):\n        self.title = title\n        self.pages = pages\n\nbook = Book(\"Python Notes\", 120)\nprint(book.title, \"has\", book.pages, \"pages\")",
+    "starter": "",
     "testInputs": [],
     "expectedContains": [
-      "Python Notes",
       "120"
     ],
     "requiredCode": [
@@ -2080,9 +2052,9 @@ Type one Python command at a time. Your variables and functions stay available d
     "topic": "Modules",
     "title": "Math module",
     "objective": "Import and use a standard module.",
-    "instructions": "Use the math module to calculate the square root of 81. The output must include 9.",
+    "instructions": "Use the math module to calculate and print the square root of 81.",
     "engine": "brython",
-    "starter": "import math\nresult = math.sqrt(81)\nprint(\"Square root:\", result)",
+    "starter": "",
     "testInputs": [],
     "expectedContains": [
       "9"
@@ -2101,7 +2073,7 @@ Type one Python command at a time. Your variables and functions stay available d
     "objective": "Use a module to generate a repeatable random value for testing.",
     "instructions": "Use random.seed(1), then generate a number from 1 to 6. The output must include Dice.",
     "engine": "brython",
-    "starter": "import random\nrandom.seed(1)\ndice = random.randint(1, 6)\nprint(\"Dice:\", dice)",
+    "starter": "",
     "testInputs": [],
     "expectedContains": [
       "Dice"
@@ -2120,7 +2092,7 @@ Type one Python command at a time. Your variables and functions stay available d
     "objective": "Use Pyodide and matplotlib to create a simple plot.",
     "instructions": "Create a line plot with x values 1, 2, 3 and y values 2, 4, 6. Print Plot ready.",
     "engine": "pyodide",
-    "starter": "import matplotlib.pyplot as plt\n\nx = [1, 2, 3]\ny = [2, 4, 6]\nplt.figure()\nplt.plot(x, y)\nplt.title(\"Simple line\")\nplt.show()\nprint(\"Plot ready\")",
+    "starter": "",
     "testInputs": [],
     "expectedContains": [
       "Plot ready"
@@ -2137,13 +2109,11 @@ Type one Python command at a time. Your variables and functions stay available d
     "topic": "Graphics",
     "title": "Pixel grid as text",
     "objective": "Represent a graphic using nested lists and printed rows.",
-    "instructions": "Create a 3 by 3 pixel grid using a list of strings and print each row. The output must include #.#.",
+    "instructions": "Create a 3 by 3 pixel grid using a list of strings and print each row.",
     "engine": "brython",
-    "starter": "pixels = [\"#.#\", \".#.\", \"#.#\"]\nfor row in pixels:\n    print(row)",
+    "starter": "",
     "testInputs": [],
-    "expectedContains": [
-      "#.#"
-    ],
+    "expectedContains": [],
     "requiredCode": [
       "[",
       "for"
@@ -2158,13 +2128,13 @@ Type one Python command at a time. Your variables and functions stay available d
     "objective": "Use coordinates and conditionals to detect a collision.",
     "instructions": "Create a function that checks whether two 1D rectangles overlap. Print Collision for intervals 0-5 and 3-8.",
     "engine": "brython",
-    "starter": "def overlaps(a_start, a_end, b_start, b_end):\n    return a_start < b_end and b_start < a_end\n\nif overlaps(0, 5, 3, 8):\n    print(\"Collision\")\nelse:\n    print(\"No collision\")",
+    "starter": "",
     "testInputs": [],
     "expectedContains": [
       "Collision"
     ],
     "requiredCode": [
-      "def overlaps",
+      "def",
       "return",
       "and"
     ]
@@ -2178,10 +2148,9 @@ Type one Python command at a time. Your variables and functions stay available d
     "objective": "Update x and y positions using variables.",
     "instructions": "Start a sprite at x=0, y=0. Add 5 to x and 3 to y. Print the final position.",
     "engine": "brython",
-    "starter": "x = 0\ny = 0\nx = x + 5\ny = y + 3\nprint(\"Position:\", x, y)",
+    "starter": "",
     "testInputs": [],
     "expectedContains": [
-      "Position",
       "5",
       "3"
     ],
@@ -2200,10 +2169,9 @@ Type one Python command at a time. Your variables and functions stay available d
     "objective": "Simulate events using a list and a loop.",
     "instructions": "Given events jump, left, jump, count how many times jump appears and print the result.",
     "engine": "brython",
-    "starter": "events = [\"jump\", \"left\", \"jump\"]\njumps = 0\nfor event in events:\n    if event == \"jump\":\n        jumps = jumps + 1\nprint(\"jump events:\", jumps)",
+    "starter": "",
     "testInputs": [],
     "expectedContains": [
-      "jump events",
       "2"
     ],
     "requiredCode": [
@@ -2221,7 +2189,7 @@ Type one Python command at a time. Your variables and functions stay available d
     "objective": "Use input to simulate a keyboard event.",
     "instructions": "Ask for a command. If the input is w, print Move up. Test input is w.",
     "engine": "brython",
-    "starter": "key = input(\"Key: \").lower()\nif key == \"w\":\n    print(\"Move up\")\nelif key == \"s\":\n    print(\"Move down\")\nelse:\n    print(\"Stay\")",
+    "starter": "",
     "testInputs": [
       "w"
     ],
@@ -2243,11 +2211,10 @@ Type one Python command at a time. Your variables and functions stay available d
     "objective": "Represent sound events with strings and loops.",
     "instructions": "Create a list of three sound names and print Playing plus each sound name.",
     "engine": "brython",
-    "starter": "sounds = [\"beep\", \"coin\", \"win\"]\nfor sound in sounds:\n    print(\"Playing\", sound)",
+    "starter": "",
     "testInputs": [],
     "expectedContains": [
-      "Playing beep",
-      "Playing win"
+      "playing"
     ],
     "requiredCode": [
       "[",
@@ -2261,9 +2228,9 @@ Type one Python command at a time. Your variables and functions stay available d
     "topic": "Sound",
     "title": "Volume limiter",
     "objective": "Use a function and conditionals to keep values in a safe range.",
-    "instructions": "Create a function that limits volume to a maximum of 100. With test input 120, the output must include 100.",
+    "instructions": "Create a function that limits volume to a maximum of 100. Test with input 120.",
     "engine": "brython",
-    "starter": "def limit_volume(volume):\n    if volume > 100:\n        return 100\n    return volume\n\nvalue = int(input(\"Volume: \"))\nprint(\"Safe volume:\", limit_volume(value))",
+    "starter": "",
     "testInputs": [
       "120"
     ],
@@ -2271,7 +2238,7 @@ Type one Python command at a time. Your variables and functions stay available d
       "100"
     ],
     "requiredCode": [
-      "def limit_volume",
+      "def",
       "if",
       "return"
     ]
@@ -2285,7 +2252,7 @@ Type one Python command at a time. Your variables and functions stay available d
     "objective": "Build a GUI that reacts to a button click and performs a calculation.",
     "instructions": "Create a GUI that asks for Celsius, converts it to Fahrenheit, and displays the result. Print Temperature GUI ready.",
     "engine": "brython",
-    "starter": "import gui\n\ngui.clear()\ngui.title(\"Temperature Converter\")\ngui.input(\"celsius\", \"Celsius\")\n\ndef convert():\n    celsius = float(gui.value(\"celsius\"))\n    fahrenheit = celsius * 9 / 5 + 32\n    gui.text(\"Fahrenheit: \" + str(fahrenheit))\n\ngui.button(\"Convert\", convert)\nprint(\"Temperature GUI ready\")",
+    "starter": "",
     "testInputs": [],
     "expectedContains": [
       "Temperature GUI ready"
@@ -2305,7 +2272,7 @@ Type one Python command at a time. Your variables and functions stay available d
     "objective": "Use input and conditionals to simulate choosing from a menu.",
     "instructions": "Ask the user for option 1, 2, or 3. With test input 2, print Settings.",
     "engine": "brython",
-    "starter": "option = input(\"Choose 1 Play, 2 Settings, 3 Exit: \")\nif option == \"1\":\n    print(\"Play\")\nelif option == \"2\":\n    print(\"Settings\")\nelse:\n    print(\"Exit\")",
+    "starter": "",
     "testInputs": [
       "2"
     ],
@@ -2325,9 +2292,9 @@ Type one Python command at a time. Your variables and functions stay available d
     "topic": "Print formatting and strings",
     "title": "Formatted score",
     "objective": "Format a decimal number to two decimal places.",
-    "instructions": "Store score = 3.14159 and print it with two decimal places. The output must include 3.14.",
+    "instructions": "Store score = 3.14159 and print it with two decimal places.",
     "engine": "brython",
-    "starter": "score = 3.14159\nprint(f\"Score: {score:.2f}\")",
+    "starter": "",
     "testInputs": [],
     "expectedContains": [
       "3.14"
@@ -2346,7 +2313,7 @@ Type one Python command at a time. Your variables and functions stay available d
     "objective": "Use string methods to transform text.",
     "instructions": "Store the text python lab. Print it in uppercase and print its length.",
     "engine": "brython",
-    "starter": "text = \"python lab\"\nprint(text.upper())\nprint(\"Length:\", len(text))",
+    "starter": "",
     "testInputs": [],
     "expectedContains": [
       "PYTHON LAB",
@@ -2364,12 +2331,11 @@ Type one Python command at a time. Your variables and functions stay available d
     "topic": "File input and output",
     "title": "Read lines from text",
     "objective": "Practice file-like thinking using a multiline string in the browser.",
-    "instructions": "Use splitlines() to count the lines in a multiline string. The output must include 3.",
+    "instructions": "Use splitlines() to count the lines in a string containing red, blue, and green on separate lines. Print the count.",
     "engine": "brython",
-    "starter": "text = \"apple\\nbanana\\ncherry\"\nlines = text.splitlines()\nprint(\"Line count:\", len(lines))",
+    "starter": "",
     "testInputs": [],
     "expectedContains": [
-      "Line count",
       "3"
     ],
     "requiredCode": [
@@ -2386,12 +2352,10 @@ Type one Python command at a time. Your variables and functions stay available d
     "objective": "Represent saved data using a dictionary and JSON text.",
     "instructions": "Create a dictionary with a player and score, convert it to JSON text, and print Saved.",
     "engine": "brython",
-    "starter": "import json\n\ndata = {\"player\": \"Ana\", \"score\": 50}\nsaved_text = json.dumps(data)\nprint(\"Saved:\", saved_text)",
+    "starter": "",
     "testInputs": [],
     "expectedContains": [
-      "Saved",
-      "Ana",
-      "50"
+      "Saved"
     ],
     "requiredCode": [
       "import json",
@@ -2408,7 +2372,7 @@ Type one Python command at a time. Your variables and functions stay available d
     "objective": "Use the random module to simulate a die roll.",
     "instructions": "Use random.randint(1, 6) to create a dice simulator and print Dice roll.",
     "engine": "brython",
-    "starter": "import random\nroll = random.randint(1, 6)\nprint(\"Dice roll:\", roll)",
+    "starter": "",
     "testInputs": [],
     "expectedContains": [
       "Dice roll"
@@ -2427,10 +2391,9 @@ Type one Python command at a time. Your variables and functions stay available d
     "objective": "Use lists and loops to create combinations.",
     "instructions": "Create a list of suits and values. Build a 12-card mini deck and print the deck size.",
     "engine": "brython",
-    "starter": "suits = [\"hearts\", \"spades\", \"clubs\"]\nvalues = [\"A\", \"2\", \"3\", \"4\"]\ndeck = []\nfor suit in suits:\n    for value in values:\n        deck.append(value + \" of \" + suit)\nprint(\"Deck size:\", len(deck))",
+    "starter": "",
     "testInputs": [],
     "expectedContains": [
-      "Deck size",
       "12"
     ],
     "requiredCode": [
@@ -2446,9 +2409,9 @@ Type one Python command at a time. Your variables and functions stay available d
     "topic": "Computer simulations",
     "title": "Lander height step",
     "objective": "Simulate one step of changing position with variables.",
-    "instructions": "Start height at 100 and velocity at -5. Update height once and print the new height. The output must include 95.",
+    "instructions": "Start height at 100 and velocity at -5. Update height once and print the new height.",
     "engine": "brython",
-    "starter": "height = 100\nvelocity = -5\nheight = height + velocity\nprint(\"New height:\", height)",
+    "starter": "",
     "testInputs": [],
     "expectedContains": [
       "95"
@@ -2468,10 +2431,9 @@ Type one Python command at a time. Your variables and functions stay available d
     "objective": "Use a loop to simulate a value changing over time.",
     "instructions": "Start hunger at 0. Increase it three times in a loop. Print the final hunger value.",
     "engine": "brython",
-    "starter": "hunger = 0\nfor minute in range(3):\n    hunger = hunger + 1\nprint(\"Hunger:\", hunger)",
+    "starter": "",
     "testInputs": [],
     "expectedContains": [
-      "Hunger",
       "3"
     ],
     "requiredCode": [
@@ -2489,11 +2451,9 @@ Type one Python command at a time. Your variables and functions stay available d
     "objective": "Reflect on future programming goals using lists and output.",
     "instructions": "Create a list with three Python topics you want to keep practicing and print each topic.",
     "engine": "brython",
-    "starter": "topics = [\"functions\", \"data\", \"projects\"]\nfor topic in topics:\n    print(\"Next topic:\", topic)",
+    "starter": "",
     "testInputs": [],
-    "expectedContains": [
-      "Next topic"
-    ],
+    "expectedContains": [],
     "requiredCode": [
       "[",
       "for"
@@ -2508,71 +2468,20 @@ Type one Python command at a time. Your variables and functions stay available d
     "objective": "Combine variables, lists, loops, conditionals, and functions in one small program.",
     "instructions": "Create a function that receives a list of scores and returns Mastery if the average is 4.0 or higher. Use scores [4, 5, 4] and print Report ready.",
     "engine": "brython",
-    "starter": "def status(scores):\n    average = sum(scores) / len(scores)\n    if average >= 4.0:\n        return \"Mastery\"\n    return \"Needs revision\"\n\nscores = [4, 5, 4]\nprint(\"Status:\", status(scores))\nprint(\"Report ready\")",
+    "starter": "",
     "testInputs": [],
     "expectedContains": [
       "Mastery",
       "Report ready"
     ],
     "requiredCode": [
-      "def status",
+      "def",
       "if",
       "return",
       "sum"
     ]
   }
 ];
-
-    const examples = {
-      basics: `name = input("What is your name? ")
-age = int(input("How old are you? "))
-
-print("Hello,", name)
-print("Next year you will be", age + 1)
-
-if age >= 18:
-    print("Adult")
-else:
-    print("Minor")`,
-
-      data: `import numpy as np
-import pandas as pd
-import matplotlib.pyplot as plt
-
-scores = np.array([3.2, 4.1, 3.8, 4.6, 2.9, 5.0])
-df = pd.DataFrame({
-    "student": ["A", "B", "C", "D", "E", "F"],
-    "score": scores
-})
-
-print(df)
-print()
-print("Average:", scores.mean())
-print("Highest:", scores.max())
-
-plt.figure()
-plt.bar(df["student"], df["score"])
-plt.title("Student Scores")
-plt.xlabel("Student")
-plt.ylabel("Score")
-plt.show()`,
-
-      gui: `import gui
-
-gui.clear()
-gui.title("Simple Python GUI")
-gui.text("This interface was created from Python code.")
-gui.input("nameBox", "Write your name")
-
-def greet():
-    name = gui.value("nameBox")
-    gui.text("Hello, " + name + "!")
-
-gui.button("Greet", greet)
-gui.button("Clear GUI", gui.clear)
-
-print("The GUI is ready.")`
-    };
 
     window.addEventListener('load', function () {
       setupBrowserGuiBridge();
@@ -3146,8 +3055,8 @@ sys.modules["gui"] = gui
       editor.value = getExercise(activeExerciseId).starter;
       saveEditorDraft();
       updateEditor();
-      outputBox.textContent = 'Starter code loaded.';
-      setStatus('neutral', 'Starter code loaded.');
+      outputBox.textContent = 'No output yet.';
+      setStatus('neutral', 'Editor cleared for this exercise.');
     }
 
     function updateExerciseCounter() {
@@ -3160,13 +3069,24 @@ sys.modules["gui"] = gui
 
     function configureAccountControls() {
       const bridge = window.pythonLabAccount;
-      document.getElementById('signInButton').disabled = !bridge || !bridge.configured;
+      const available = Boolean(bridge && bridge.configured && bridge.ready);
+      document.getElementById('signInButton').disabled = !available;
+      document.getElementById('emailLinkButton').disabled = !available;
+      document.getElementById('emailLinkButton').textContent = bridge && bridge.emailLinkPending
+        ? 'Finish sign-in' : 'Email me a sign-in link';
+      if (bridge && bridge.emailLinkPending) {
+        setSaveStatus('neutral', 'Enter the school email that received your sign-in link.');
+      }
       if (!bridge || !bridge.configured) {
         setSaveStatus('neutral', 'Online accounts need setup. You can still practice and download your .py file.');
       }
     }
 
     window.addEventListener('pythonlab-ready', configureAccountControls);
+    window.addEventListener('pythonlab-email-link-pending', function () {
+      configureAccountControls();
+      loginEmailInput.focus();
+    });
     window.addEventListener('pythonlab-error', function (event) {
       setSaveStatus('bad', 'Account service unavailable: ' + event.detail);
     });
@@ -3178,6 +3098,8 @@ sys.modules["gui"] = gui
       studentNameInput.value = user
         ? localStorage.getItem('pythonLabName:' + user.uid) || user.name || ''
         : '';
+      document.getElementById('loginEmailField').hidden = Boolean(user);
+      document.getElementById('emailLinkButton').hidden = Boolean(user);
       document.getElementById('signInButton').hidden = Boolean(user);
       document.getElementById('signOutButton').hidden = !user;
       document.getElementById('profileButton').hidden = !user;
@@ -3194,6 +3116,20 @@ sys.modules["gui"] = gui
         else setSaveStatus('neutral', 'Signed out. Sign in to save or load progress.');
       }
     });
+
+    async function useEmailLink() {
+      try {
+        const bridge = window.pythonLabAccount;
+        if (bridge.emailLinkPending) {
+          await bridge.completeEmailLink(loginEmailInput.value);
+        } else {
+          await bridge.sendEmailLink(loginEmailInput.value);
+          setSaveStatus('ok', 'Check your school inbox and open the sign-in link.');
+        }
+      } catch (error) {
+        setSaveStatus('bad', error.message || String(error));
+      }
+    }
 
     async function signInStudent() {
       try {
@@ -3230,7 +3166,7 @@ sys.modules["gui"] = gui
 
     function validateStudentProfile() {
       if (!activeAccount) {
-        return { ok: false, message: 'Sign in with your GLM Google account before saving.' };
+        return { ok: false, message: 'Sign in with your school email before saving.' };
       }
       const name = studentNameInput.value.trim();
       if (name.length < 3 || name.length > 120) {
@@ -3293,11 +3229,11 @@ sys.modules["gui"] = gui
       }
 
       if (missingOutput.length > 0) {
-        feedback += 'Missing expected output: ' + missingOutput.join(', ') + '. ';
+        feedback += 'The output does not yet meet the task requirements. Check your reasoning and run it again. ';
       }
 
       if (missingCode.length > 0) {
-        feedback += 'Check required structure: ' + missingCode.join(', ') + '. ';
+        feedback += 'A required programming structure is missing. Revisit the learning objective. ';
       }
 
       if (passedAll) {
@@ -3380,9 +3316,7 @@ sys.modules["gui"] = gui
         feedback: evaluation.feedback,
         reflection: studentReflection.value.trim(),
         code: editor.value,
-        output: outputBox.textContent,
-        testInputs: (exercise.testInputs || []).join(' | '),
-        expectedChecks: (exercise.expectedContains || []).join(' | ')
+        output: outputBox.textContent
       };
       savingProgress = true;
       document.getElementById('saveDraftButton').disabled = true;
@@ -3680,30 +3614,6 @@ _images
 
     function appendLine(text) {
       appendOutput(String(text) + '\n');
-    }
-
-    function loadExample(name) {
-      editor.value = examples[name] || examples.basics;
-      saveEditorDraft();
-      updateEditor();
-
-      if (name === 'data') {
-        engineSelect.value = 'pyodide';
-      }
-
-      if (name === 'gui' || name === 'basics') {
-        engineSelect.value = 'brython';
-      }
-
-      changeEngine();
-
-      outputBox.textContent = 'No output yet.';
-      plotArea.innerHTML = 'Matplotlib plots will appear here when using Pyodide.';
-      plotArea.className = 'hint';
-      guiPreview.innerHTML = 'Python browser GUI components will appear here.';
-      guiPreview.className = 'hint';
-
-      setStatus('neutral', 'Example loaded.');
     }
 
     function toggleResultFocus(cardId, button) {

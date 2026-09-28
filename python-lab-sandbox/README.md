@@ -1,6 +1,6 @@
 # GLM Python Lab · Sandbox
 
-A GitHub Pages version of the supplied Python Sandbox. It preserves the browser Python workspace, the Brython and Pyodide engines, GUI and plot previews, and the 50 learning path exercises. Students can run code without signing in. Once configured, they can use their verified `@glm.edu.co` Google account to save or reload each exercise from Cloud Firestore.
+A GitHub Pages version of the supplied Python Sandbox. It preserves the browser Python workspace, the Brython and Pyodide engines, GUI and plot previews, and the 50 learning path exercises. The exercises open with a blank editor, and automatic feedback does not disclose exact expected outputs. Students can run code without signing in. Once configured, they can sign in with their school Google account **or** receive a one-time sign-in link at their `@glm.edu.co` email to save and reload work from Cloud Firestore.
 
 ## What is stored
 
@@ -11,10 +11,10 @@ The automatic exercise checks run in the student's browser and are formative fee
 ## Enable student accounts
 
 1. Create a Firebase project owned by the school or an approved institutional administrator. Decide the school's retention and data policy before uploading student work.
-2. In **Authentication → Sign-in method**, enable the **Google** provider. In **Authentication → Settings → Authorized domains**, add the Pages host `karbian.github.io` (or your custom domain). Google's account picker receives an `hd=glm.edu.co` hint; the app and rules also check the verified email domain. The hint alone is not access control.
+2. In **Authentication → Sign-in method**, enable the **Google** provider and the **Email/Password** and **Email link (passwordless sign-in)** options. In **Authentication → Settings → Authorized domains**, add the Pages host `karbian.github.io` (or your custom domain). Students using email links must open the link in the browser and confirm the receiving address; a link can be completed on another device. The app and rules check the verified `@glm.edu.co` address. Google's account picker domain hint alone is not access control.
 3. Create a **Cloud Firestore** database. Publish the complete contents of `firestore.rules` in **Firestore Database → Rules**. Do this before students sign in; do not leave Firestore in test mode. These rules grant access only to the verified Google account's own records.
 4. In **Project settings → Your apps**, register a Web app and copy its public config fields into `firebase-config.js`: `apiKey`, `authDomain`, `projectId`, and `appId`. Do not add service account keys, private keys, or admin credentials to this repository. Firebase's web config is public; access depends on the rules.
-5. Commit the config update. Visit the Pages URL, sign in with a school test account, save one draft, refresh, and click **Load progress**. Test with a second school account: it must not see the first account's code. An outside Google account must be rejected.
+5. Commit the config update. Visit the Pages URL, sign in with a school test account using each method, save one draft, refresh, and click **Load progress**. Test with a second school account: it must not see the first account's code. An outside account must be rejected.
 
 Until steps 1–4 are complete, the sandbox still runs Python but displays **Online accounts need setup**. It does not claim that a browser-only save has been sent to the cloud.
 
@@ -30,7 +30,7 @@ The uploaded Apps Script backend appended attempts to a Google Sheet and looked 
 
 ## Security notes
 
-- Restrict access in `firestore.rules`, not in visible JavaScript. The Firebase project must use those rules as written.
+- Restrict access in `firestore.rules`, not in visible JavaScript. The Firebase project must use those rules as written. The exact checks remain in the downloaded client code for formative evaluation; they are not protected exam answers. Move grading to a controlled server if these exercises become summative assessments.
 - Students' code is executed in their own browser. Third-party Python packages and the supplied Brython/Pyodide runtimes load from public CDNs; advanced exercises may fetch packages.
 - The account selector may create a Firebase Authentication user for a non-school Google account before the app rejects it, but Firestore rules deny that account student-data access. An administrator can clean up such unused Authentication users.
 - Local drafts may remain on a shared computer under the account's UID. Students should sign out and use **Save Draft** before switching devices; school devices should clear browser data according to school policy.
