@@ -1,0 +1,4068 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+  <title>GLM Python Lab · Sandbox</title>
+
+  <!-- Pyodide for advanced libraries -->
+  <script src="https://cdn.jsdelivr.net/pyodide/v0.29.4/full/pyodide.js"></script>
+
+  <!-- Brython for fast browser-based Python -->
+  <script src="https://cdn.jsdelivr.net/npm/brython@3/brython.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/brython@3/brython_stdlib.js"></script>
+
+  <style>
+    :root {
+      --navy: #0B1F3A;
+      --blue: #1E4E8C;
+      --gold: #D9A441;
+      --cream: #F7F3E8;
+      --paper: #ffffff;
+      --ink: #172033;
+      --muted: #637083;
+      --error: #b42318;
+      --warning: #a15c07;
+      --success: #067647;
+      --border: #d8dee8;
+      --editor-bg: #101827;
+      --editor-ink: #edf2f7;
+      --gutter: #1d2939;
+      --logo-green: #46b748;
+      --logo-cyan: #32bad2;
+      --soft-green: #e9f8ea;
+      --soft-cyan: #e8f8fb;
+    }
+
+    * {
+      box-sizing: border-box;
+    }
+
+    body {
+      margin: 0;
+      font-family: Arial, Helvetica, sans-serif;
+      background:
+        linear-gradient(135deg, rgba(70, 183, 72, 0.08), transparent 28%),
+        linear-gradient(315deg, rgba(50, 186, 210, 0.10), transparent 30%),
+        var(--cream);
+      color: var(--ink);
+    }
+
+    header {
+      background:
+        radial-gradient(circle at top left, rgba(70, 183, 72, 0.28), transparent 32%),
+        radial-gradient(circle at top right, rgba(50, 186, 210, 0.30), transparent 30%),
+        linear-gradient(135deg, var(--navy), var(--blue));
+      color: white;
+      padding: 18px 24px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      gap: 18px;
+      flex-wrap: wrap;
+      border-bottom: 5px solid var(--gold);
+    }
+
+    .brand {
+      display: flex;
+      align-items: center;
+      gap: 16px;
+      min-width: 280px;
+    }
+
+    .logo-box {
+      width: 96px;
+      height: 68px;
+      background: rgba(255, 255, 255, 0.95);
+      border-radius: 20px;
+      padding: 8px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      box-shadow: 0 10px 24px rgba(0, 0, 0, 0.22);
+    }
+
+    .logo-box img {
+      max-width: 100%;
+      max-height: 100%;
+      object-fit: contain;
+      display: none;
+    }
+
+    .logo-fallback {
+      font-weight: 900;
+      font-size: 20px;
+      color: var(--navy);
+      letter-spacing: 1px;
+    }
+
+    .brand-text h1 {
+      margin: 0;
+      font-size: 26px;
+      line-height: 1.1;
+    }
+
+    .brand-text p {
+      margin: 6px 0 0;
+      font-size: 14px;
+      opacity: 0.92;
+      max-width: 620px;
+    }
+
+    .header-badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      margin-top: 8px;
+      padding: 5px 10px;
+      border-radius: 999px;
+      background: rgba(255, 255, 255, 0.16);
+      border: 1px solid rgba(255, 255, 255, 0.24);
+      font-size: 12px;
+      font-weight: 700;
+    }
+
+    .header-badge::before {
+      content: '';
+      width: 9px;
+      height: 9px;
+      border-radius: 50%;
+      background: var(--logo-green);
+      box-shadow: 14px 0 0 var(--logo-cyan);
+    }
+
+    .toolbar {
+      display: flex;
+      gap: 10px;
+      flex-wrap: wrap;
+      justify-content: flex-end;
+    }
+
+    button {
+      border: none;
+      border-radius: 12px;
+      padding: 10px 14px;
+      font-weight: 800;
+      cursor: pointer;
+      transition: transform 0.1s ease, opacity 0.2s ease, box-shadow 0.2s ease;
+    }
+
+    button:hover {
+      transform: translateY(-1px);
+      box-shadow: 0 8px 18px rgba(11, 31, 58, 0.18);
+    }
+
+    button:disabled {
+      opacity: 0.6;
+      cursor: wait;
+      transform: none;
+      box-shadow: none;
+    }
+
+    .primary {
+      background: linear-gradient(135deg, var(--gold), #f4c95d);
+      color: #1c1c1c;
+    }
+
+    .secondary {
+      background: rgba(255, 255, 255, 0.95);
+      color: var(--navy);
+      border: 1px solid rgba(255, 255, 255, 0.35);
+    }
+
+    .danger {
+      background: #fee4e2;
+      color: var(--error);
+    }
+
+    .success-button {
+      background: linear-gradient(135deg, var(--logo-green), #77d879);
+      color: white;
+    }
+
+    main {
+      display: grid;
+      grid-template-columns: 1.35fr 0.65fr;
+      gap: 18px;
+      padding: 18px;
+    }
+
+    @media (max-width: 980px) {
+      main {
+        grid-template-columns: 1fr;
+      }
+    }
+
+    .card {
+      background: rgba(255, 255, 255, 0.96);
+      border: 1px solid var(--border);
+      border-radius: 22px;
+      box-shadow: 0 10px 28px rgba(11, 31, 58, 0.10);
+      overflow: hidden;
+      backdrop-filter: blur(8px);
+    }
+
+    .card-title {
+      padding: 14px 16px;
+      border-bottom: 1px solid var(--border);
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      gap: 10px;
+      flex-wrap: wrap;
+      background:
+        linear-gradient(90deg, rgba(70, 183, 72, 0.08), rgba(50, 186, 210, 0.08));
+    }
+
+    .card-title h2 {
+      margin: 0;
+      font-size: 17px;
+      color: var(--navy);
+    }
+
+    .editor-shell {
+      height: 650px;
+      display: grid;
+      grid-template-columns: 54px 1fr;
+      background: var(--editor-bg);
+      color: var(--editor-ink);
+      overflow: hidden;
+    }
+
+    .line-numbers {
+      background: var(--gutter);
+      color: #98a2b3;
+      padding: 16px 8px;
+      text-align: right;
+      font-family: Consolas, Monaco, monospace;
+      font-size: 15px;
+      line-height: 24px;
+      overflow: hidden;
+      user-select: none;
+      border-right: 1px solid #344054;
+    }
+
+    .editor-layer {
+      position: relative;
+      height: 100%;
+      overflow: hidden;
+    }
+
+    #highlight,
+    #editor {
+      position: absolute;
+      inset: 0;
+      margin: 0;
+      padding: 16px;
+      font-family: Consolas, Monaco, monospace;
+      font-size: 15px;
+      line-height: 24px;
+      white-space: pre;
+      tab-size: 2;
+      overflow: auto;
+    }
+
+    #highlight {
+      pointer-events: none;
+      color: var(--editor-ink);
+    }
+
+    #editor {
+      background: transparent;
+      color: transparent;
+      caret-color: white;
+      border: none;
+      outline: none;
+      resize: none;
+      width: 100%;
+      height: 100%;
+    }
+
+    #editor::selection {
+      background: rgba(217, 164, 65, 0.35);
+    }
+
+    .kw {
+      color: #7dd3fc;
+      font-weight: 700;
+    }
+
+    .builtin {
+      color: #f9a8d4;
+      font-weight: 700;
+    }
+
+    .num {
+      color: #fbbf24;
+    }
+
+    .str {
+      color: #86efac;
+    }
+
+    .com {
+      color: #94a3b8;
+      font-style: italic;
+    }
+
+    .op {
+      color: #f0abfc;
+    }
+
+    .side {
+      display: grid;
+      gap: 18px;
+      align-content: start;
+    }
+
+    .panel-body {
+      padding: 14px 16px;
+    }
+
+    .status {
+      padding: 10px 12px;
+      border-radius: 12px;
+      font-weight: 700;
+      margin-bottom: 12px;
+    }
+
+    .status.ok {
+      background: #dcfae6;
+      color: var(--success);
+    }
+
+    .status.bad {
+      background: #fee4e2;
+      color: var(--error);
+    }
+
+    .status.neutral {
+      background: #eef4ff;
+      color: var(--blue);
+    }
+
+    pre.output {
+      background: #0f172a;
+      color: #f8fafc;
+      border-radius: 12px;
+      padding: 12px;
+      min-height: 150px;
+      max-height: 300px;
+      white-space: pre-wrap;
+      overflow: auto;
+      font-family: Consolas, Monaco, monospace;
+    }
+
+    .hint {
+      color: var(--muted);
+      font-size: 13px;
+      line-height: 1.4;
+    }
+
+    .pill {
+      background: #eef4ff;
+      color: var(--blue);
+      padding: 5px 8px;
+      border-radius: 999px;
+      font-size: 12px;
+      font-weight: 700;
+    }
+
+    .engine-select {
+      width: 100%;
+      padding: 10px;
+      border: 1px solid var(--border);
+      border-radius: 10px;
+      margin: 8px 0 10px;
+      font-weight: 700;
+      color: var(--navy);
+      background: white;
+    }
+
+    .engine-help {
+      border-radius: 12px;
+      padding: 10px;
+      background: #f8fafc;
+      border: 1px solid var(--border);
+      margin-bottom: 12px;
+    }
+
+    .library-grid {
+      display: grid;
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+      gap: 8px;
+      margin-bottom: 12px;
+    }
+
+    .library-grid label {
+      border: 1px solid var(--border);
+      border-radius: 10px;
+      padding: 8px;
+      font-size: 13px;
+      background: #f8fafc;
+      cursor: pointer;
+    }
+
+    .library-grid input {
+      margin-right: 6px;
+    }
+
+    .disabled-panel {
+      opacity: 0.55;
+      pointer-events: none;
+    }
+
+    input.package-input {
+      width: 100%;
+      padding: 10px;
+      border: 1px solid var(--border);
+      border-radius: 10px;
+      margin-bottom: 8px;
+    }
+
+    #guiPreview {
+      min-height: 140px;
+      background: #f8fafc;
+      border: 1px dashed #98a2b3;
+      border-radius: 12px;
+      padding: 12px;
+    }
+
+    #guiPreview button {
+      margin: 4px;
+      background: var(--blue);
+      color: white;
+    }
+
+    #guiPreview input {
+      padding: 8px;
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      margin: 4px;
+    }
+
+    #plotArea {
+      min-height: 80px;
+      background: #ffffff;
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      padding: 10px;
+      overflow: auto;
+    }
+
+    #plotArea img {
+      max-width: 100%;
+      display: block;
+      margin: 8px 0;
+      border: 1px solid var(--border);
+      border-radius: 8px;
+    }
+
+    .student-grid {
+      display: grid;
+      gap: 10px;
+    }
+
+    .form-row {
+      display: grid;
+      grid-template-columns: 1fr;
+      gap: 6px;
+    }
+
+    .form-row label {
+      font-size: 12px;
+      font-weight: 800;
+      color: var(--navy);
+      text-transform: uppercase;
+      letter-spacing: 0.03em;
+    }
+
+    .form-row input,
+    .form-row select,
+    .form-row textarea {
+      width: 100%;
+      padding: 10px;
+      border: 1px solid var(--border);
+      border-radius: 10px;
+      font-family: Arial, Helvetica, sans-serif;
+      background: white;
+      color: var(--ink);
+    }
+
+    .form-row textarea {
+      resize: vertical;
+      min-height: 70px;
+    }
+
+    .profile-actions {
+      display: flex;
+      gap: 8px;
+      flex-wrap: wrap;
+      margin-top: 8px;
+    }
+
+    .exercise-list {
+      display: grid;
+      gap: 8px;
+      max-height: 380px;
+      overflow: auto;
+      padding-right: 4px;
+    }
+
+    .exercise-card {
+      border: 1px solid var(--border);
+      border-radius: 14px;
+      padding: 10px;
+      background: #f8fafc;
+      cursor: pointer;
+      transition: transform 0.1s ease, border-color 0.2s ease, background 0.2s ease;
+    }
+
+    .exercise-card:hover {
+      transform: translateY(-1px);
+      border-color: var(--blue);
+    }
+
+    .exercise-card.active {
+      background: linear-gradient(135deg, var(--soft-green), var(--soft-cyan));
+      border-color: var(--logo-green);
+      box-shadow: inset 4px 0 0 var(--logo-green);
+    }
+
+    .exercise-card h3 {
+      margin: 0 0 4px;
+      color: var(--navy);
+      font-size: 14px;
+    }
+
+    .exercise-card p {
+      margin: 0;
+      color: var(--muted);
+      font-size: 12px;
+      line-height: 1.35;
+    }
+
+    .exercise-meta {
+      display: flex;
+      gap: 6px;
+      flex-wrap: wrap;
+      margin-top: 8px;
+    }
+
+    .level-tag,
+    .status-tag {
+      display: inline-flex;
+      align-items: center;
+      border-radius: 999px;
+      padding: 4px 7px;
+      font-size: 11px;
+      font-weight: 800;
+    }
+
+    .level-tag {
+      background: #eef4ff;
+      color: var(--blue);
+    }
+
+    .status-tag {
+      background: #fff6db;
+      color: #7a4b00;
+    }
+
+    .progress-box {
+      border-radius: 12px;
+      border: 1px solid var(--border);
+      background: #f8fafc;
+      padding: 10px;
+      margin-top: 10px;
+      font-size: 13px;
+      line-height: 1.45;
+    }
+
+    .progress-box strong {
+      color: var(--navy);
+    }
+
+    .mini-grid {
+      display: grid;
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+      gap: 8px;
+    }
+
+    @media (max-width: 560px) {
+      .mini-grid {
+        grid-template-columns: 1fr;
+      }
+    }
+
+    .small-button {
+      padding: 8px 10px;
+      font-size: 12px;
+      border-radius: 10px;
+    }
+
+
+
+    /* =========================================================
+       STUDENT-FRIENDLY WORKSPACE OVERRIDES
+       Live results first; code and learning task second;
+       configuration tools last.
+       ========================================================= */
+    body {
+      min-height: 100vh;
+    }
+
+    header {
+      padding: 12px 18px;
+      position: relative;
+    }
+
+    .brand {
+      min-width: 240px;
+    }
+
+    .logo-box {
+      width: 76px;
+      height: 58px;
+      border-radius: 16px;
+    }
+
+    .brand-text h1 {
+      font-size: 23px;
+    }
+
+    .brand-text p {
+      max-width: 560px;
+      margin-top: 4px;
+    }
+
+    .toolbar {
+      align-items: center;
+    }
+
+    .toolbar button {
+      min-height: 42px;
+    }
+
+    .page-shell {
+      width: min(1680px, 100%);
+      margin: 0 auto;
+      padding: 14px 18px 24px;
+    }
+
+    .student-quickbar {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 10px;
+      align-items: end;
+      padding: 12px;
+      margin-bottom: 14px;
+      background: rgba(255, 255, 255, 0.97);
+      border: 1px solid var(--border);
+      border-radius: 18px;
+      box-shadow: 0 8px 22px rgba(11, 31, 58, 0.08);
+    }
+
+    .student-quickbar .quick-field { flex: 1 1 180px; }
+    .student-quickbar .quickbar-status { flex: 1 1 220px; }
+    [hidden] { display: none !important; }
+
+    .quick-field label {
+      display: block;
+      margin-bottom: 5px;
+      color: var(--navy);
+      font-size: 11px;
+      font-weight: 900;
+      letter-spacing: .04em;
+      text-transform: uppercase;
+    }
+
+    .quick-field input {
+      width: 100%;
+      min-height: 42px;
+      padding: 9px 11px;
+      border: 1px solid var(--border);
+      border-radius: 11px;
+      background: white;
+      color: var(--ink);
+      font-size: 14px;
+    }
+
+    .quickbar-status {
+      min-width: 0;
+    }
+
+    .quickbar-status .status {
+      margin: 0;
+      min-height: 42px;
+      display: flex;
+      align-items: center;
+    }
+
+    .results-heading {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      gap: 10px;
+      margin: 0 2px 8px;
+    }
+
+    .results-heading h2 {
+      margin: 0;
+      color: var(--navy);
+      font-size: 19px;
+    }
+
+    .results-heading p {
+      margin: 0;
+      color: var(--muted);
+      font-size: 12px;
+    }
+
+    .results-dashboard {
+      display: grid;
+      grid-template-columns: 1.4fr 1fr 1fr;
+      gap: 12px;
+      margin-bottom: 14px;
+    }
+
+    .result-card {
+      min-width: 0;
+      border-radius: 18px;
+    }
+
+    .result-card .card-title {
+      padding: 10px 12px;
+    }
+
+    .result-card .card-title h2 {
+      font-size: 15px;
+    }
+
+    .result-card .panel-body {
+      padding: 10px;
+    }
+
+    .result-card pre.output,
+    .result-card #guiPreview,
+    .result-card #plotArea {
+      height: 210px;
+      min-height: 210px;
+      max-height: 210px;
+      margin: 0;
+      overflow: auto;
+    }
+
+    .result-card pre.output {
+      font-size: 14px;
+      line-height: 1.45;
+    }
+
+    .result-card #guiPreview,
+    .result-card #plotArea {
+      background: #fbfcfe;
+    }
+
+    .result-focus-button {
+      padding: 6px 9px;
+      font-size: 11px;
+      background: white;
+      color: var(--blue);
+      border: 1px solid var(--border);
+    }
+
+    .results-dashboard.has-focus .result-card:not(.result-focus) {
+      display: none;
+    }
+
+    .results-dashboard .result-card.result-focus {
+      grid-column: 1 / -1;
+    }
+
+    .results-dashboard .result-card.result-focus pre.output,
+    .results-dashboard .result-card.result-focus #guiPreview,
+    .results-dashboard .result-card.result-focus #plotArea {
+      height: 420px;
+      min-height: 420px;
+      max-height: 60vh;
+    }
+
+    main.workspace-grid {
+      display: grid;
+      grid-template-columns: minmax(0, 1.55fr) minmax(320px, .68fr);
+      gap: 14px;
+      padding: 0;
+      margin: 0;
+    }
+
+    .editor-card {
+      min-width: 0;
+    }
+
+    .editor-card .card-title {
+      position: relative;
+    }
+
+    .editor-actions {
+      display: flex;
+      gap: 7px;
+      flex-wrap: wrap;
+      align-items: center;
+    }
+
+    .editor-heading {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      flex-wrap: wrap;
+    }
+
+    .workspace-tabs {
+      display: inline-flex;
+      gap: 4px;
+      padding: 4px;
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      background: rgba(255, 255, 255, 0.82);
+    }
+
+    .workspace-tab {
+      padding: 7px 10px;
+      border-radius: 8px;
+      background: transparent;
+      color: var(--muted);
+      font-size: 12px;
+      box-shadow: none;
+    }
+
+    .workspace-tab:hover {
+      box-shadow: none;
+    }
+
+    .workspace-tab.active {
+      background: var(--navy);
+      color: white;
+    }
+
+    .workspace-pane[hidden],
+    .editor-actions[hidden] {
+      display: none !important;
+    }
+
+    .python-shell {
+      height: clamp(470px, 60vh, 720px);
+      display: grid;
+      grid-template-rows: 1fr auto auto;
+      background: #08111f;
+      color: #e5edf7;
+      font-family: Consolas, Monaco, monospace;
+    }
+
+    .shell-transcript {
+      margin: 0;
+      padding: 18px;
+      overflow: auto;
+      white-space: pre-wrap;
+      overflow-wrap: anywhere;
+      font: inherit;
+      font-size: 15px;
+      line-height: 1.55;
+      color: #dce7f5;
+    }
+
+    .shell-composer {
+      display: grid;
+      grid-template-columns: auto minmax(0, 1fr) auto;
+      gap: 10px;
+      align-items: start;
+      padding: 12px 14px;
+      background: #101b2d;
+      border-top: 1px solid #344054;
+    }
+
+    .shell-prompt {
+      color: #86efac;
+      font-weight: 900;
+      line-height: 24px;
+      padding-top: 9px;
+      user-select: none;
+    }
+
+    #shellInput {
+      width: 100%;
+      min-height: 42px;
+      max-height: 170px;
+      resize: vertical;
+      padding: 9px 10px;
+      border: 1px solid #475467;
+      border-radius: 10px;
+      outline: none;
+      background: #0b1424;
+      color: #f8fafc;
+      caret-color: white;
+      font: inherit;
+      font-size: 15px;
+      line-height: 22px;
+      tab-size: 4;
+    }
+
+    #shellInput:focus {
+      border-color: var(--logo-cyan);
+      box-shadow: 0 0 0 3px rgba(50, 186, 210, 0.18);
+    }
+
+    .shell-run-button {
+      min-height: 42px;
+      white-space: nowrap;
+    }
+
+    .shell-help {
+      margin: 0;
+      padding: 9px 14px 11px;
+      background: #101b2d;
+      color: #98a2b3;
+      border-top: 1px solid rgba(71, 84, 103, 0.45);
+      font-family: Arial, Helvetica, sans-serif;
+      font-size: 12px;
+      line-height: 1.4;
+    }
+
+    .shell-help strong {
+      color: #d0d5dd;
+    }
+
+    .editor-shell {
+      height: clamp(470px, 60vh, 720px);
+    }
+
+    .task-sidebar {
+      display: grid;
+      gap: 14px;
+      align-content: start;
+      min-width: 0;
+    }
+
+    .exercise-list {
+      max-height: 330px;
+    }
+
+    .exercise-card {
+      padding: 11px;
+    }
+
+    .settings-area {
+      display: grid;
+      grid-template-columns: repeat(3, minmax(0, 1fr));
+      gap: 14px;
+      margin-top: 14px;
+    }
+
+    details.settings-card {
+      background: rgba(255,255,255,.96);
+      border: 1px solid var(--border);
+      border-radius: 16px;
+      box-shadow: 0 8px 20px rgba(11,31,58,.06);
+      overflow: hidden;
+    }
+
+    details.settings-card > summary {
+      list-style: none;
+      cursor: pointer;
+      padding: 12px 14px;
+      color: var(--navy);
+      font-weight: 900;
+      background: linear-gradient(90deg, rgba(70,183,72,.08), rgba(50,186,210,.08));
+      border-bottom: 1px solid transparent;
+    }
+
+    details.settings-card > summary::-webkit-details-marker {
+      display: none;
+    }
+
+    details.settings-card > summary::after {
+      content: '＋';
+      float: right;
+      color: var(--blue);
+    }
+
+    details.settings-card[open] > summary {
+      border-bottom-color: var(--border);
+    }
+
+    details.settings-card[open] > summary::after {
+      content: '−';
+    }
+
+    .settings-note {
+      margin: 12px 2px 0;
+      color: var(--muted);
+      font-size: 12px;
+      text-align: center;
+    }
+
+    .keyboard-hint {
+      font-size: 11px;
+      color: var(--muted);
+      font-weight: 700;
+      white-space: nowrap;
+    }
+
+    @media (max-width: 1180px) {
+      .student-quickbar {
+        grid-template-columns: 1fr 1.2fr auto auto;
+      }
+
+      .quickbar-status {
+        grid-column: 1 / -1;
+      }
+
+      .results-dashboard {
+        grid-template-columns: 1.25fr 1fr;
+      }
+
+      #outputCard {
+        grid-column: 1 / -1;
+      }
+
+      .result-card pre.output,
+      .result-card #guiPreview,
+      .result-card #plotArea {
+        height: 190px;
+        min-height: 190px;
+        max-height: 190px;
+      }
+
+      main.workspace-grid {
+        grid-template-columns: minmax(0, 1fr) 330px;
+      }
+
+      .settings-area {
+        grid-template-columns: 1fr 1fr;
+      }
+    }
+
+    @media (max-width: 900px) {
+      .page-shell {
+        padding: 12px;
+      }
+
+      header {
+        padding: 12px;
+      }
+
+      .toolbar {
+        width: 100%;
+        justify-content: stretch;
+      }
+
+      .toolbar button {
+        flex: 1 1 150px;
+      }
+
+      .results-dashboard {
+        grid-template-columns: 1fr 1fr;
+      }
+
+      main.workspace-grid {
+        grid-template-columns: 1fr;
+      }
+
+      .task-sidebar {
+        grid-row: 1;
+      }
+
+      .editor-card {
+        grid-row: 2;
+      }
+
+      .exercise-list {
+        max-height: 230px;
+      }
+
+      .editor-shell {
+        height: 560px;
+      }
+
+      .python-shell {
+        height: 560px;
+      }
+    }
+
+    @media (max-width: 680px) {
+      .brand-text p,
+      .header-badge {
+        display: none;
+      }
+
+      .student-quickbar {
+        grid-template-columns: 1fr;
+      }
+
+      .quickbar-status {
+        grid-column: auto;
+      }
+
+      .student-quickbar button {
+        width: 100%;
+      }
+
+      .results-heading {
+        align-items: flex-start;
+        flex-direction: column;
+      }
+
+      .results-dashboard {
+        grid-template-columns: 1fr;
+      }
+
+      #outputCard {
+        grid-column: auto;
+      }
+
+      .result-card pre.output,
+      .result-card #guiPreview,
+      .result-card #plotArea {
+        height: 180px;
+        min-height: 180px;
+        max-height: 180px;
+      }
+
+      .editor-shell {
+        height: 500px;
+        grid-template-columns: 42px 1fr;
+      }
+
+      .python-shell {
+        height: 500px;
+      }
+
+      .editor-heading {
+        width: 100%;
+      }
+
+      .workspace-tabs {
+        width: 100%;
+      }
+
+      .workspace-tab {
+        flex: 1;
+      }
+
+      .shell-composer {
+        grid-template-columns: auto minmax(0, 1fr);
+      }
+
+      .shell-run-button {
+        grid-column: 1 / -1;
+        width: 100%;
+      }
+
+      .line-numbers {
+        padding-left: 4px;
+        padding-right: 5px;
+        font-size: 13px;
+      }
+
+      #highlight,
+      #editor {
+        padding: 13px 10px;
+        font-size: 14px;
+      }
+
+      .settings-area {
+        grid-template-columns: 1fr;
+      }
+
+      .editor-actions .keyboard-hint {
+        width: 100%;
+      }
+    }
+
+  </style>
+</head>
+
+<body>
+  <header>
+    <div class="brand">
+      <div class="logo-box">
+        <img id="brandLogo" alt="Institutional logo">
+        <div id="logoFallback" class="logo-fallback">GLM</div>
+      </div>
+
+      <div class="brand-text">
+        <h1>GLM Python Lab</h1>
+        <p>Write code, run it, and see the result immediately. Sign in with your GLM account to save and resume each exercise.</p>
+        <div class="header-badge">Student coding workspace</div>
+      </div>
+    </div>
+
+    <div class="toolbar">
+      <button class="primary" id="runButton" onclick="runCurrentWorkspace()">▶ Run Python</button>
+      <button class="success-button" id="saveRunButton" onclick="evaluateAndSaveProgress()">✓ Evaluate & Save</button>
+      <button class="secondary" id="saveDraftButton" onclick="saveManualProgress()">Save Draft</button>
+      <button class="secondary" onclick="downloadPythonFile()">Download .py</button>
+      <button class="secondary" onclick="copyCode()">Copy Code</button>
+      <button class="danger" onclick="clearCurrentWorkspace()">Clear</button>
+    </div>
+  </header>
+
+  <div class="page-shell">
+    <section class="student-quickbar" aria-label="Student profile and runtime status">
+      <div class="quick-field">
+        <label for="studentName">Student name</label>
+        <input id="studentName" autocomplete="name" placeholder="Full name">
+      </div>
+
+      <div class="quick-field">
+        <label for="studentEmail">GLM email</label>
+        <input id="studentEmail" type="email" readonly placeholder="Sign in with Google">
+      </div>
+
+      <button class="primary" id="signInButton" onclick="signInStudent()">Sign in with Google</button>
+      <button class="secondary" id="signOutButton" onclick="signOutStudent()" hidden>Sign out</button>
+      <button class="secondary" id="profileButton" onclick="saveStudentProfile()" hidden>Save name</button>
+      <button class="secondary" id="loadProgressButton" onclick="loadMyProgress()" hidden>Load progress</button>
+
+      <div class="quickbar-status">
+        <div id="status" class="status neutral">Starting browser Python...</div>
+      </div>
+      <span id="profilePill" class="pill" role="status">Signed out</span>
+    </section>
+
+    <div class="results-heading">
+      <div>
+        <h2>Live Results</h2>
+        <p>Run your code and check these three areas first.</p>
+      </div>
+      <span class="pill" id="enginePill">Brython selected</span>
+    </div>
+
+    <section class="results-dashboard" id="liveResults" aria-label="Python execution results">
+      <section class="card result-card" id="outputCard">
+        <div class="card-title">
+          <h2>1. Output</h2>
+          <button class="result-focus-button" onclick="toggleResultFocus('outputCard', this)">Expand</button>
+        </div>
+        <div class="panel-body">
+          <pre class="output" id="output">No output yet.</pre>
+        </div>
+      </section>
+
+      <section class="card result-card" id="guiCard">
+        <div class="card-title">
+          <h2>2. GUI Preview</h2>
+          <button class="result-focus-button" onclick="toggleResultFocus('guiCard', this)">Expand</button>
+        </div>
+        <div class="panel-body">
+          <div id="guiPreview" class="hint">Python browser GUI components will appear here.</div>
+        </div>
+      </section>
+
+      <section class="card result-card" id="plotsCard">
+        <div class="card-title">
+          <h2>3. Plots</h2>
+          <button class="result-focus-button" onclick="toggleResultFocus('plotsCard', this)">Expand</button>
+        </div>
+        <div class="panel-body">
+          <div id="plotArea" class="hint">Matplotlib plots will appear here when using Pyodide.</div>
+        </div>
+      </section>
+    </section>
+
+    <main class="workspace-grid">
+      <section class="card editor-card">
+        <div class="card-title">
+          <div class="editor-heading">
+            <h2>Python Workspace</h2>
+            <div class="workspace-tabs" role="tablist" aria-label="Choose a Python workspace">
+              <button
+                type="button"
+                id="editorTab"
+                class="workspace-tab active"
+                role="tab"
+                aria-selected="true"
+                aria-controls="scriptEditorPane"
+                onclick="switchWorkspace('editor')"
+              >Script Editor</button>
+              <button
+                type="button"
+                id="shellTab"
+                class="workspace-tab"
+                role="tab"
+                aria-selected="false"
+                aria-controls="pythonShellPane"
+                onclick="switchWorkspace('shell')"
+              >Python Shell</button>
+            </div>
+          </div>
+
+          <div class="editor-actions" id="scriptEditorActions">
+            <span class="keyboard-hint">Ctrl/Cmd + Enter = Run</span>
+            <button class="primary small-button" onclick="runPythonCode()">▶ Run</button>
+            <button class="secondary small-button" onclick="downloadPythonFile()">Save .py</button>
+          </div>
+
+          <div class="editor-actions" id="shellActions" hidden>
+            <span class="keyboard-hint">Enter = Run · Shift+Enter = New line</span>
+            <button class="secondary small-button" onclick="clearPythonShell()">Clear shell</button>
+            <button class="danger small-button" onclick="restartPythonShell()">Restart session</button>
+          </div>
+        </div>
+
+        <div class="editor-shell workspace-pane" id="scriptEditorPane" role="tabpanel" aria-labelledby="editorTab">
+          <div class="line-numbers" id="lineNumbers">1</div>
+          <div class="editor-layer">
+            <pre id="highlight"></pre>
+            <textarea id="editor" spellcheck="false" aria-label="Python code editor"></textarea>
+          </div>
+        </div>
+
+        <div class="python-shell workspace-pane" id="pythonShellPane" role="tabpanel" aria-labelledby="shellTab" hidden>
+          <pre class="shell-transcript" id="shellTranscript" aria-live="polite">GLM Python Shell
+Type one Python command at a time. Your variables and functions stay available during this session.
+
+</pre>
+          <div class="shell-composer">
+            <span class="shell-prompt" aria-hidden="true">&gt;&gt;&gt;</span>
+            <textarea
+              id="shellInput"
+              rows="1"
+              spellcheck="false"
+              autocomplete="off"
+              aria-label="Python Shell command"
+              placeholder="Example: total = 7 * 24 * 60"
+            ></textarea>
+            <button type="button" class="primary shell-run-button" id="shellRunButton" onclick="runShellCommand()">Run line</button>
+          </div>
+          <p class="shell-help">
+            <strong>Try:</strong> <code>2 + 2</code>, then <code>name = "Ana"</code>, then <code>print(name)</code>.
+            Use Shift+Enter to write a function, loop, or conditional on several lines.
+          </p>
+        </div>
+      </section>
+
+      <aside class="task-sidebar">
+        <section class="card">
+          <div class="card-title">
+            <h2>Current Learning Task</h2>
+            <span class="pill" id="exerciseCounter">0 / 0</span>
+          </div>
+          <div class="panel-body">
+            <div class="exercise-list" id="exerciseList"></div>
+            <div class="progress-box" id="exerciseDetails">
+              Select an exercise to see the instructions and starter code.
+            </div>
+            <div class="mini-grid" style="margin-top:10px;">
+              
+              <button class="success-button small-button" onclick="evaluateAndSaveProgress()">Evaluate & Save</button>
+            </div>
+          </div>
+        </section>
+
+        <section class="card">
+          <div class="card-title">
+            <h2>Quick Examples</h2>
+          </div>
+          <div class="panel-body">
+            <div class="mini-grid">
+              <button class="secondary small-button" onclick="loadExample('basics')">Basic</button>
+              <button class="secondary small-button" onclick="loadExample('data')">Data + Plot</button>
+              <button class="secondary small-button" onclick="loadExample('gui')">GUI</button>
+              <button class="secondary small-button" onclick="copyCode()">Copy code</button>
+            </div>
+            <p class="hint" style="margin-bottom:0;">Examples replace the code currently in the editor.</p>
+          </div>
+        </section>
+      </aside>
+    </main>
+
+    <section class="settings-area" aria-label="Additional Python Lab controls">
+      <details class="settings-card">
+        <summary>Runtime & Engine</summary>
+        <div class="panel-body">
+          <select id="engineSelect" class="engine-select" onchange="changeEngine()">
+            <option value="brython">Brython — fast basic Python and browser GUI</option>
+            <option value="pyodide">Pyodide — libraries, data, plots, CSV analysis</option>
+          </select>
+          <div id="engineHelp" class="engine-help hint"></div>
+          <div class="hint" id="runtimeInfo">Brython starts first. Pyodide loads only when selected or needed.</div>
+        </div>
+      </details>
+
+      <details class="settings-card">
+        <summary>Libraries</summary>
+        <div class="panel-body">
+          <div id="librariesPanel">
+            <div class="library-grid">
+              <label><input type="checkbox" value="numpy" checked>numpy</label>
+              <label><input type="checkbox" value="pandas" checked>pandas</label>
+              <label><input type="checkbox" value="matplotlib" checked>matplotlib</label>
+              <label><input type="checkbox" value="scipy">scipy</label>
+              <label><input type="checkbox" value="sympy">sympy</label>
+              <label><input type="checkbox" value="scikit-learn">scikit-learn</label>
+              <label><input type="checkbox" value="pillow">pillow</label>
+              <label><input type="checkbox" value="networkx">networkx</label>
+              <label><input type="checkbox" value="micropip">micropip</label>
+              <label><input type="checkbox" value="sqlite3">sqlite3</label>
+            </div>
+            <input class="package-input" id="extraPackages" placeholder="Extra packages, separated by commas. Example: plotly, snowballstemmer">
+            <button class="success-button" id="loadLibrariesButton" onclick="loadSelectedPackages(event)">Load Selected Libraries</button>
+          </div>
+          <p class="hint" id="libraryHint">Libraries are available with Pyodide. Brython is better for basic Python and web interaction.</p>
+        </div>
+      </details>
+
+      <details class="settings-card">
+        <summary>Progress & Reflection</summary>
+        <div class="panel-body student-grid">
+          <div class="form-row">
+            <label for="manualStatus">Manual status</label>
+            <select id="manualStatus">
+              <option value="In progress">In progress</option>
+              <option value="Submitted">Submitted</option>
+              <option value="Completed">Completed</option>
+              <option value="Needs revision">Needs revision</option>
+              <option value="Mastery evidence">Mastery evidence</option>
+            </select>
+          </div>
+          <div class="form-row">
+            <label for="studentReflection">Student reflection / teacher note</label>
+            <textarea id="studentReflection" placeholder="What worked? What needs revision?"></textarea>
+          </div>
+          <div class="progress-box" id="saveStatusBox" role="status" aria-live="polite">Sign in with your GLM account to save progress across devices.</div>
+        </div>
+      </details>
+    </section>
+
+    <p class="settings-note">Student workflow: choose a task → write code → run → inspect Output / GUI / Plots → evaluate and save.</p>
+  </div>
+
+
+  <script type="module" src="./account.js"></script>
+  <script>
+    const editor = document.getElementById('editor');
+    const highlight = document.getElementById('highlight');
+    const lineNumbers = document.getElementById('lineNumbers');
+    const outputBox = document.getElementById('output');
+    const plotArea = document.getElementById('plotArea');
+    const guiPreview = document.getElementById('guiPreview');
+    const engineSelect = document.getElementById('engineSelect');
+    const enginePill = document.getElementById('enginePill');
+    const engineHelp = document.getElementById('engineHelp');
+    const librariesPanel = document.getElementById('librariesPanel');
+    const loadLibrariesButton = document.getElementById('loadLibrariesButton');
+    const libraryHint = document.getElementById('libraryHint');
+    const scriptEditorPane = document.getElementById('scriptEditorPane');
+    const pythonShellPane = document.getElementById('pythonShellPane');
+    const scriptEditorActions = document.getElementById('scriptEditorActions');
+    const shellActions = document.getElementById('shellActions');
+    const editorTab = document.getElementById('editorTab');
+    const shellTab = document.getElementById('shellTab');
+    const shellTranscript = document.getElementById('shellTranscript');
+    const shellInput = document.getElementById('shellInput');
+    const shellRunButton = document.getElementById('shellRunButton');
+
+    const studentNameInput = document.getElementById('studentName');
+    const studentEmailInput = document.getElementById('studentEmail');
+    const profilePill = document.getElementById('profilePill');
+    const exerciseList = document.getElementById('exerciseList');
+    const exerciseDetails = document.getElementById('exerciseDetails');
+    const exerciseCounter = document.getElementById('exerciseCounter');
+    const manualStatus = document.getElementById('manualStatus');
+    const studentReflection = document.getElementById('studentReflection');
+    const saveStatusBox = document.getElementById('saveStatusBox');
+
+    let pyodide = null;
+    let pyodideReady = false;
+    let brythonReady = false;
+    let pyodideShellGlobals = null;
+    let shellCaptureActive = false;
+    let shellHistory = [];
+    let shellHistoryIndex = 0;
+    let activeWorkspace = localStorage.getItem('pythonLabWorkspace') === 'shell'
+      ? 'shell'
+      : 'editor';
+
+    let activeExerciseId = 'CH01-E01';
+    let activeAccount = null;
+    let savingProgress = false;
+    let currentAutoInputs = [];
+    let lastRun = {
+      ok: null,
+      status: 'Not run',
+      output: '',
+      engine: '',
+      at: ''
+    };
+    let localProgress = {};
+
+    const learningPath = [
+  {
+    "id": "CH01-E01",
+    "chapter": 1,
+    "level": "Chapter 1",
+    "topic": "Getting started / arithmetic",
+    "title": "Minutes in a week",
+    "objective": "Use print() and arithmetic operators to calculate a result.",
+    "instructions": "Calculate and display the number of minutes in one week.",
+    "engine": "brython",
+    "starter": "minutes = 7 * 24 * 60\nprint(\"Minutes in a week:\", minutes)",
+    "testInputs": [],
+    "expectedContains": [
+      "10080"
+    ],
+    "requiredCode": [
+      "print",
+      "*"
+    ]
+  },
+  {
+    "id": "CH01-E02",
+    "chapter": 1,
+    "level": "Chapter 1",
+    "topic": "Getting started / output",
+    "title": "Three personal lines",
+    "objective": "Write a simple program with several print() instructions.",
+    "instructions": "Print your name, your birth date, and your favorite color on three separate lines.",
+    "engine": "brython",
+    "starter": "print(\"My name is Student Name.\")\nprint(\"I was born on January 1.\")\nprint(\"My favorite color is blue.\")",
+    "testInputs": [],
+    "expectedContains": [
+      "My name",
+      "favorite color"
+    ],
+    "requiredCode": [
+      "print"
+    ]
+  },
+  {
+    "id": "CH02-E01",
+    "chapter": 2,
+    "level": "Chapter 2",
+    "topic": "Memory and variables",
+    "title": "Remember a message",
+    "objective": "Assign values to variables and reuse them in output.",
+    "instructions": "Create variables for a course name and a teacher name, then print a sentence using both variables.",
+    "engine": "brython",
+    "starter": "course = \"Python Lab\"\nteacher = \"GLM Teacher\"\nprint(course, \"with\", teacher)",
+    "testInputs": [],
+    "expectedContains": [
+      "Python Lab",
+      "GLM Teacher"
+    ],
+    "requiredCode": [
+      "=",
+      "print"
+    ]
+  },
+  {
+    "id": "CH02-E02",
+    "chapter": 2,
+    "level": "Chapter 2",
+    "topic": "Memory and variables",
+    "title": "Change a variable",
+    "objective": "Show that a variable can store a new value later in the program.",
+    "instructions": "Store a first score, print it, change the score, and print the updated score.",
+    "engine": "brython",
+    "starter": "score = 3\nprint(\"First score:\", score)\nscore = 5\nprint(\"Updated score:\", score)",
+    "testInputs": [],
+    "expectedContains": [
+      "First score",
+      "Updated score",
+      "5"
+    ],
+    "requiredCode": [
+      "score",
+      "="
+    ]
+  },
+  {
+    "id": "CH03-E01",
+    "chapter": 3,
+    "level": "Chapter 3",
+    "topic": "Basic math",
+    "title": "Rectangle area",
+    "objective": "Use multiplication to solve a math problem in Python.",
+    "instructions": "Ask for width and height. Print the area. Test inputs are 5 and 3, so the output must include 15.",
+    "engine": "brython",
+    "starter": "width = int(input(\"Width: \"))\nheight = int(input(\"Height: \"))\narea = width * height\nprint(\"Area:\", area)",
+    "testInputs": [
+      "5",
+      "3"
+    ],
+    "expectedContains": [
+      "Area",
+      "15"
+    ],
+    "requiredCode": [
+      "input",
+      "int",
+      "*"
+    ]
+  },
+  {
+    "id": "CH03-E02",
+    "chapter": 3,
+    "level": "Chapter 3",
+    "topic": "Basic math",
+    "title": "Powers and remainders",
+    "objective": "Use exponent and modulo operators.",
+    "instructions": "Print 2 to the power of 8 and the remainder when 17 is divided by 5.",
+    "engine": "brython",
+    "starter": "power_result = 2 ** 8\nremainder = 17 % 5\nprint(\"Power:\", power_result)\nprint(\"Remainder:\", remainder)",
+    "testInputs": [],
+    "expectedContains": [
+      "256",
+      "2"
+    ],
+    "requiredCode": [
+      "**",
+      "%"
+    ]
+  },
+  {
+    "id": "CH04-E01",
+    "chapter": 4,
+    "level": "Chapter 4",
+    "topic": "Types of data",
+    "title": "Next year age",
+    "objective": "Convert text input into an integer before doing arithmetic.",
+    "instructions": "Ask for an age and print the age for next year. With test input 12, the output must include 13.",
+    "engine": "brython",
+    "starter": "age_text = input(\"Age: \")\nage = int(age_text)\nprint(\"Next year:\", age + 1)",
+    "testInputs": [
+      "12"
+    ],
+    "expectedContains": [
+      "13"
+    ],
+    "requiredCode": [
+      "int",
+      "input",
+      "+"
+    ]
+  },
+  {
+    "id": "CH04-E02",
+    "chapter": 4,
+    "level": "Chapter 4",
+    "topic": "Types of data",
+    "title": "Decimal conversion",
+    "objective": "Convert text input into a float before calculating.",
+    "instructions": "Ask for a decimal price and add 2.5 to it. With test input 15.0, the output must include 17.5.",
+    "engine": "brython",
+    "starter": "price = float(input(\"Price: \"))\nnew_price = price + 2.5\nprint(\"New price:\", new_price)",
+    "testInputs": [
+      "15.0"
+    ],
+    "expectedContains": [
+      "17.5"
+    ],
+    "requiredCode": [
+      "float",
+      "input"
+    ]
+  },
+  {
+    "id": "CH05-E01",
+    "chapter": 5,
+    "level": "Chapter 5",
+    "topic": "Input",
+    "title": "Personal greeting",
+    "objective": "Combine input() and print() to create interactive output.",
+    "instructions": "Ask for a name and print a greeting. With test input Ana, the output must include Hello, Ana.",
+    "engine": "brython",
+    "starter": "name = input(\"Write your name: \")\nprint(\"Hello, \" + name)",
+    "testInputs": [
+      "Ana"
+    ],
+    "expectedContains": [
+      "Hello, Ana"
+    ],
+    "requiredCode": [
+      "input",
+      "print"
+    ]
+  },
+  {
+    "id": "CH05-E02",
+    "chapter": 5,
+    "level": "Chapter 5",
+    "topic": "Input",
+    "title": "Tip calculator",
+    "objective": "Use numeric input and arithmetic to calculate a final value.",
+    "instructions": "Ask for a bill and a tip percentage. Print the final total. Test inputs are 40000 and 10, so the result must include 44000.",
+    "engine": "brython",
+    "starter": "bill = float(input(\"Bill: \"))\ntip_percent = float(input(\"Tip percent: \"))\ntotal = bill + bill * tip_percent / 100\nprint(\"Total:\", total)",
+    "testInputs": [
+      "40000",
+      "10"
+    ],
+    "expectedContains": [
+      "44000"
+    ],
+    "requiredCode": [
+      "input",
+      "float",
+      "/"
+    ]
+  },
+  {
+    "id": "CH06-E01",
+    "chapter": 6,
+    "level": "Chapter 6",
+    "topic": "Graphical user interfaces",
+    "title": "Simple GUI card",
+    "objective": "Use the classroom gui module to build a simple interface.",
+    "instructions": "Create a GUI with a title, explanatory text, an input box, and a button. Print GUI ready when it is built.",
+    "engine": "brython",
+    "starter": "import gui\n\ngui.clear()\ngui.title(\"Student Card\")\ngui.text(\"Write your name and click the button.\")\ngui.input(\"nameBox\", \"Name\")\n\ndef show_name():\n    name = gui.value(\"nameBox\")\n    gui.text(\"Student: \" + name)\n\ngui.button(\"Show name\", show_name)\nprint(\"GUI ready\")",
+    "testInputs": [],
+    "expectedContains": [
+      "GUI ready"
+    ],
+    "requiredCode": [
+      "import gui",
+      "gui.button",
+      "def"
+    ]
+  },
+  {
+    "id": "CH06-E02",
+    "chapter": 6,
+    "level": "Chapter 6",
+    "topic": "Graphical user interfaces",
+    "title": "GUI calculator layout",
+    "objective": "Design a GUI that collects two values and reacts to a button click.",
+    "instructions": "Create two input boxes and a button that adds the values typed by the user. Print Calculator ready.",
+    "engine": "brython",
+    "starter": "import gui\n\ngui.clear()\ngui.title(\"Mini Calculator\")\ngui.input(\"a\", \"First number\")\ngui.input(\"b\", \"Second number\")\n\ndef add_numbers():\n    a = float(gui.value(\"a\"))\n    b = float(gui.value(\"b\"))\n    gui.text(\"Result: \" + str(a + b))\n\ngui.button(\"Add\", add_numbers)\nprint(\"Calculator ready\")",
+    "testInputs": [],
+    "expectedContains": [
+      "Calculator ready"
+    ],
+    "requiredCode": [
+      "import gui",
+      "float",
+      "gui.input"
+    ]
+  },
+  {
+    "id": "CH07-E01",
+    "chapter": 7,
+    "level": "Chapter 7",
+    "topic": "Decisions",
+    "title": "Pass or revise",
+    "objective": "Use if/else to choose between two outputs.",
+    "instructions": "Ask for a score. If it is 3.5 or higher, print Pass. Otherwise, print Revise. Test input is 3.5.",
+    "engine": "brython",
+    "starter": "score = float(input(\"Score: \"))\nif score >= 3.5:\n    print(\"Pass\")\nelse:\n    print(\"Revise\")",
+    "testInputs": [
+      "3.5"
+    ],
+    "expectedContains": [
+      "Pass"
+    ],
+    "requiredCode": [
+      "if",
+      "else",
+      ">="
+    ]
+  },
+  {
+    "id": "CH07-E02",
+    "chapter": 7,
+    "level": "Chapter 7",
+    "topic": "Decisions",
+    "title": "Largest number",
+    "objective": "Compare two values and print the greater one.",
+    "instructions": "Ask for two numbers and print the largest. Test inputs are 8 and 5, so the output must include 8.",
+    "engine": "brython",
+    "starter": "a = int(input(\"First number: \"))\nb = int(input(\"Second number: \"))\nif a > b:\n    print(\"Largest:\", a)\nelse:\n    print(\"Largest:\", b)",
+    "testInputs": [
+      "8",
+      "5"
+    ],
+    "expectedContains": [
+      "Largest",
+      "8"
+    ],
+    "requiredCode": [
+      "if",
+      "else",
+      ">"
+    ]
+  },
+  {
+    "id": "CH08-E01",
+    "chapter": 8,
+    "level": "Chapter 8",
+    "topic": "Loops",
+    "title": "Count to ten",
+    "objective": "Use a for loop with range().",
+    "instructions": "Print the numbers from 1 to 10 using a loop.",
+    "engine": "brython",
+    "starter": "for number in range(1, 11):\n    print(number)",
+    "testInputs": [],
+    "expectedContains": [
+      "1",
+      "10"
+    ],
+    "requiredCode": [
+      "for",
+      "range"
+    ]
+  },
+  {
+    "id": "CH08-E02",
+    "chapter": 8,
+    "level": "Chapter 8",
+    "topic": "Loops",
+    "title": "Sum from 1 to 100",
+    "objective": "Use a loop and accumulator variable.",
+    "instructions": "Use a loop to calculate the sum of the numbers from 1 to 100. The output must include 5050.",
+    "engine": "brython",
+    "starter": "total = 0\nfor number in range(1, 101):\n    total = total + number\nprint(\"Total:\", total)",
+    "testInputs": [],
+    "expectedContains": [
+      "5050"
+    ],
+    "requiredCode": [
+      "for",
+      "range",
+      "total"
+    ]
+  },
+  {
+    "id": "CH09-E01",
+    "chapter": 9,
+    "level": "Chapter 9",
+    "topic": "Comments",
+    "title": "Explain your program",
+    "objective": "Use comments to explain code without changing execution.",
+    "instructions": "Write a program with at least two comments and one print statement that displays Ready.",
+    "engine": "brython",
+    "starter": "# This program shows a status message.\n# Comments help humans understand the code.\nprint(\"Ready\")",
+    "testInputs": [],
+    "expectedContains": [
+      "Ready"
+    ],
+    "requiredCode": [
+      "#",
+      "print"
+    ]
+  },
+  {
+    "id": "CH09-E02",
+    "chapter": 9,
+    "level": "Chapter 9",
+    "topic": "Comments",
+    "title": "Commented converter",
+    "objective": "Document the purpose of variables and calculations.",
+    "instructions": "Convert 30 Celsius to Fahrenheit and add comments explaining the formula.",
+    "engine": "brython",
+    "starter": "# Store the Celsius temperature.\ncelsius = 30\n# Convert Celsius to Fahrenheit.\nfahrenheit = celsius * 9 / 5 + 32\nprint(\"Fahrenheit:\", fahrenheit)",
+    "testInputs": [],
+    "expectedContains": [
+      "86"
+    ],
+    "requiredCode": [
+      "#",
+      "*"
+    ]
+  },
+  {
+    "id": "CH10-E01",
+    "chapter": 10,
+    "level": "Chapter 10",
+    "topic": "Game time",
+    "title": "Tiny adventure",
+    "objective": "Combine input, conditionals, and output in a small game scene.",
+    "instructions": "Ask the player to choose left or right. With test input left, the game must print that the player found a key.",
+    "engine": "brython",
+    "starter": "choice = input(\"Go left or right? \").lower()\nif choice == \"left\":\n    print(\"You found a key!\")\nelse:\n    print(\"You found a wall.\")",
+    "testInputs": [
+      "left"
+    ],
+    "expectedContains": [
+      "key"
+    ],
+    "requiredCode": [
+      "input",
+      "if",
+      "else"
+    ]
+  },
+  {
+    "id": "CH10-E02",
+    "chapter": 10,
+    "level": "Chapter 10",
+    "topic": "Game time",
+    "title": "Score keeper",
+    "objective": "Use variables to update and display game score.",
+    "instructions": "Create a score variable, add points three times, and print the final score. The output must include 30.",
+    "engine": "brython",
+    "starter": "score = 0\nscore = score + 10\nscore = score + 10\nscore = score + 10\nprint(\"Score:\", score)",
+    "testInputs": [],
+    "expectedContains": [
+      "30"
+    ],
+    "requiredCode": [
+      "score",
+      "+"
+    ]
+  },
+  {
+    "id": "CH11-E01",
+    "chapter": 11,
+    "level": "Chapter 11",
+    "topic": "Nested and variable loops",
+    "title": "Small multiplication table",
+    "objective": "Use nested loops to generate repeated patterns.",
+    "instructions": "Use nested loops to print a multiplication table from 1 to 3. The output must include 3 x 3 = 9.",
+    "engine": "brython",
+    "starter": "for row in range(1, 4):\n    for col in range(1, 4):\n        print(row, \"x\", col, \"=\", row * col)",
+    "testInputs": [],
+    "expectedContains": [
+      "3 x 3 = 9"
+    ],
+    "requiredCode": [
+      "for",
+      "for",
+      "range"
+    ]
+  },
+  {
+    "id": "CH11-E02",
+    "chapter": 11,
+    "level": "Chapter 11",
+    "topic": "Nested and variable loops",
+    "title": "Star rectangle",
+    "objective": "Use nested loops to build a text pattern.",
+    "instructions": "Print a rectangle with 3 rows and 4 stars per row.",
+    "engine": "brython",
+    "starter": "for row in range(3):\n    line = \"\"\n    for col in range(4):\n        line = line + \"*\"\n    print(line)",
+    "testInputs": [],
+    "expectedContains": [
+      "****"
+    ],
+    "requiredCode": [
+      "for",
+      "line"
+    ]
+  },
+  {
+    "id": "CH12-E01",
+    "chapter": 12,
+    "level": "Chapter 12",
+    "topic": "Lists",
+    "title": "Average from a list",
+    "objective": "Store values in a list and calculate with them.",
+    "instructions": "Create a list with scores 3, 4, and 5. Print the average. The output must include 4.",
+    "engine": "brython",
+    "starter": "scores = [3, 4, 5]\naverage = sum(scores) / len(scores)\nprint(\"Average:\", average)",
+    "testInputs": [],
+    "expectedContains": [
+      "4"
+    ],
+    "requiredCode": [
+      "[",
+      "sum",
+      "len"
+    ]
+  },
+  {
+    "id": "CH12-E02",
+    "chapter": 12,
+    "level": "Chapter 12",
+    "topic": "Lists",
+    "title": "Shopping list builder",
+    "objective": "Use append() and a loop to work with list items.",
+    "instructions": "Start with a list containing apples and bananas, append bread, and print each item.",
+    "engine": "brython",
+    "starter": "shopping = [\"apples\", \"bananas\"]\nshopping.append(\"bread\")\nfor item in shopping:\n    print(item)",
+    "testInputs": [],
+    "expectedContains": [
+      "apples",
+      "bananas",
+      "bread"
+    ],
+    "requiredCode": [
+      "append",
+      "for"
+    ]
+  },
+  {
+    "id": "CH13-E01",
+    "chapter": 13,
+    "level": "Chapter 13",
+    "topic": "Functions",
+    "title": "Square function",
+    "objective": "Define and call a function that returns a value.",
+    "instructions": "Create a function named square that receives a number and returns its square. Print square(5).",
+    "engine": "brython",
+    "starter": "def square(number):\n    return number * number\n\nprint(square(5))",
+    "testInputs": [],
+    "expectedContains": [
+      "25"
+    ],
+    "requiredCode": [
+      "def square",
+      "return"
+    ]
+  },
+  {
+    "id": "CH13-E02",
+    "chapter": 13,
+    "level": "Chapter 13",
+    "topic": "Functions",
+    "title": "Total price function",
+    "objective": "Create a function with more than one argument.",
+    "instructions": "Create a function named total_price(price, quantity) that returns price times quantity. Print total_price(1200, 3).",
+    "engine": "brython",
+    "starter": "def total_price(price, quantity):\n    return price * quantity\n\nprint(\"Total:\", total_price(1200, 3))",
+    "testInputs": [],
+    "expectedContains": [
+      "3600"
+    ],
+    "requiredCode": [
+      "def total_price",
+      "return"
+    ]
+  },
+  {
+    "id": "CH14-E01",
+    "chapter": 14,
+    "level": "Chapter 14",
+    "topic": "Objects",
+    "title": "Pet object",
+    "objective": "Create a simple class with attributes and a method.",
+    "instructions": "Create a Pet class with a name and a speak method. Create a pet named Luna and make it speak.",
+    "engine": "brython",
+    "starter": "class Pet:\n    def __init__(self, name):\n        self.name = name\n\n    def speak(self):\n        print(self.name, \"says hello!\")\n\npet = Pet(\"Luna\")\npet.speak()",
+    "testInputs": [],
+    "expectedContains": [
+      "Luna",
+      "hello"
+    ],
+    "requiredCode": [
+      "class Pet",
+      "__init__",
+      "self"
+    ]
+  },
+  {
+    "id": "CH14-E02",
+    "chapter": 14,
+    "level": "Chapter 14",
+    "topic": "Objects",
+    "title": "Book object",
+    "objective": "Use object attributes to describe a real-world item.",
+    "instructions": "Create a Book class with title and pages. Print a sentence about a book with 120 pages.",
+    "engine": "brython",
+    "starter": "class Book:\n    def __init__(self, title, pages):\n        self.title = title\n        self.pages = pages\n\nbook = Book(\"Python Notes\", 120)\nprint(book.title, \"has\", book.pages, \"pages\")",
+    "testInputs": [],
+    "expectedContains": [
+      "Python Notes",
+      "120"
+    ],
+    "requiredCode": [
+      "class Book",
+      "self",
+      "."
+    ]
+  },
+  {
+    "id": "CH15-E01",
+    "chapter": 15,
+    "level": "Chapter 15",
+    "topic": "Modules",
+    "title": "Math module",
+    "objective": "Import and use a standard module.",
+    "instructions": "Use the math module to calculate the square root of 81. The output must include 9.",
+    "engine": "brython",
+    "starter": "import math\nresult = math.sqrt(81)\nprint(\"Square root:\", result)",
+    "testInputs": [],
+    "expectedContains": [
+      "9"
+    ],
+    "requiredCode": [
+      "import math",
+      "math.sqrt"
+    ]
+  },
+  {
+    "id": "CH15-E02",
+    "chapter": 15,
+    "level": "Chapter 15",
+    "topic": "Modules",
+    "title": "Random module with seed",
+    "objective": "Use a module to generate a repeatable random value for testing.",
+    "instructions": "Use random.seed(1), then generate a number from 1 to 6. The output must include Dice.",
+    "engine": "brython",
+    "starter": "import random\nrandom.seed(1)\ndice = random.randint(1, 6)\nprint(\"Dice:\", dice)",
+    "testInputs": [],
+    "expectedContains": [
+      "Dice"
+    ],
+    "requiredCode": [
+      "import random",
+      "randint"
+    ]
+  },
+  {
+    "id": "CH16-E01",
+    "chapter": 16,
+    "level": "Chapter 16",
+    "topic": "Graphics",
+    "title": "Matplotlib drawing",
+    "objective": "Use Pyodide and matplotlib to create a simple plot.",
+    "instructions": "Create a line plot with x values 1, 2, 3 and y values 2, 4, 6. Print Plot ready.",
+    "engine": "pyodide",
+    "starter": "import matplotlib.pyplot as plt\n\nx = [1, 2, 3]\ny = [2, 4, 6]\nplt.figure()\nplt.plot(x, y)\nplt.title(\"Simple line\")\nplt.show()\nprint(\"Plot ready\")",
+    "testInputs": [],
+    "expectedContains": [
+      "Plot ready"
+    ],
+    "requiredCode": [
+      "import matplotlib",
+      "plt.plot"
+    ]
+  },
+  {
+    "id": "CH16-E02",
+    "chapter": 16,
+    "level": "Chapter 16",
+    "topic": "Graphics",
+    "title": "Pixel grid as text",
+    "objective": "Represent a graphic using nested lists and printed rows.",
+    "instructions": "Create a 3 by 3 pixel grid using a list of strings and print each row. The output must include #.#.",
+    "engine": "brython",
+    "starter": "pixels = [\"#.#\", \".#.\", \"#.#\"]\nfor row in pixels:\n    print(row)",
+    "testInputs": [],
+    "expectedContains": [
+      "#.#"
+    ],
+    "requiredCode": [
+      "[",
+      "for"
+    ]
+  },
+  {
+    "id": "CH17-E01",
+    "chapter": 17,
+    "level": "Chapter 17",
+    "topic": "Sprites and collision detection",
+    "title": "Rectangle collision",
+    "objective": "Use coordinates and conditionals to detect a collision.",
+    "instructions": "Create a function that checks whether two 1D rectangles overlap. Print Collision for intervals 0-5 and 3-8.",
+    "engine": "brython",
+    "starter": "def overlaps(a_start, a_end, b_start, b_end):\n    return a_start < b_end and b_start < a_end\n\nif overlaps(0, 5, 3, 8):\n    print(\"Collision\")\nelse:\n    print(\"No collision\")",
+    "testInputs": [],
+    "expectedContains": [
+      "Collision"
+    ],
+    "requiredCode": [
+      "def overlaps",
+      "return",
+      "and"
+    ]
+  },
+  {
+    "id": "CH17-E02",
+    "chapter": 17,
+    "level": "Chapter 17",
+    "topic": "Sprites and collision detection",
+    "title": "Move a sprite",
+    "objective": "Update x and y positions using variables.",
+    "instructions": "Start a sprite at x=0, y=0. Add 5 to x and 3 to y. Print the final position.",
+    "engine": "brython",
+    "starter": "x = 0\ny = 0\nx = x + 5\ny = y + 3\nprint(\"Position:\", x, y)",
+    "testInputs": [],
+    "expectedContains": [
+      "Position",
+      "5",
+      "3"
+    ],
+    "requiredCode": [
+      "x",
+      "y",
+      "+"
+    ]
+  },
+  {
+    "id": "CH18-E01",
+    "chapter": 18,
+    "level": "Chapter 18",
+    "topic": "Events",
+    "title": "Event counter",
+    "objective": "Simulate events using a list and a loop.",
+    "instructions": "Given events jump, left, jump, count how many times jump appears and print the result.",
+    "engine": "brython",
+    "starter": "events = [\"jump\", \"left\", \"jump\"]\njumps = 0\nfor event in events:\n    if event == \"jump\":\n        jumps = jumps + 1\nprint(\"jump events:\", jumps)",
+    "testInputs": [],
+    "expectedContains": [
+      "jump events",
+      "2"
+    ],
+    "requiredCode": [
+      "for",
+      "if",
+      "events"
+    ]
+  },
+  {
+    "id": "CH18-E02",
+    "chapter": 18,
+    "level": "Chapter 18",
+    "topic": "Events",
+    "title": "Keyboard command",
+    "objective": "Use input to simulate a keyboard event.",
+    "instructions": "Ask for a command. If the input is w, print Move up. Test input is w.",
+    "engine": "brython",
+    "starter": "key = input(\"Key: \").lower()\nif key == \"w\":\n    print(\"Move up\")\nelif key == \"s\":\n    print(\"Move down\")\nelse:\n    print(\"Stay\")",
+    "testInputs": [
+      "w"
+    ],
+    "expectedContains": [
+      "Move up"
+    ],
+    "requiredCode": [
+      "input",
+      "if",
+      "elif"
+    ]
+  },
+  {
+    "id": "CH19-E01",
+    "chapter": 19,
+    "level": "Chapter 19",
+    "topic": "Sound",
+    "title": "Sound playlist simulation",
+    "objective": "Represent sound events with strings and loops.",
+    "instructions": "Create a list of three sound names and print Playing plus each sound name.",
+    "engine": "brython",
+    "starter": "sounds = [\"beep\", \"coin\", \"win\"]\nfor sound in sounds:\n    print(\"Playing\", sound)",
+    "testInputs": [],
+    "expectedContains": [
+      "Playing beep",
+      "Playing win"
+    ],
+    "requiredCode": [
+      "[",
+      "for"
+    ]
+  },
+  {
+    "id": "CH19-E02",
+    "chapter": 19,
+    "level": "Chapter 19",
+    "topic": "Sound",
+    "title": "Volume limiter",
+    "objective": "Use a function and conditionals to keep values in a safe range.",
+    "instructions": "Create a function that limits volume to a maximum of 100. With test input 120, the output must include 100.",
+    "engine": "brython",
+    "starter": "def limit_volume(volume):\n    if volume > 100:\n        return 100\n    return volume\n\nvalue = int(input(\"Volume: \"))\nprint(\"Safe volume:\", limit_volume(value))",
+    "testInputs": [
+      "120"
+    ],
+    "expectedContains": [
+      "100"
+    ],
+    "requiredCode": [
+      "def limit_volume",
+      "if",
+      "return"
+    ]
+  },
+  {
+    "id": "CH20-E01",
+    "chapter": 20,
+    "level": "Chapter 20",
+    "topic": "More GUIs",
+    "title": "Temperature GUI",
+    "objective": "Build a GUI that reacts to a button click and performs a calculation.",
+    "instructions": "Create a GUI that asks for Celsius, converts it to Fahrenheit, and displays the result. Print Temperature GUI ready.",
+    "engine": "brython",
+    "starter": "import gui\n\ngui.clear()\ngui.title(\"Temperature Converter\")\ngui.input(\"celsius\", \"Celsius\")\n\ndef convert():\n    celsius = float(gui.value(\"celsius\"))\n    fahrenheit = celsius * 9 / 5 + 32\n    gui.text(\"Fahrenheit: \" + str(fahrenheit))\n\ngui.button(\"Convert\", convert)\nprint(\"Temperature GUI ready\")",
+    "testInputs": [],
+    "expectedContains": [
+      "Temperature GUI ready"
+    ],
+    "requiredCode": [
+      "import gui",
+      "gui.button",
+      "float"
+    ]
+  },
+  {
+    "id": "CH20-E02",
+    "chapter": 20,
+    "level": "Chapter 20",
+    "topic": "More GUIs",
+    "title": "Menu simulation",
+    "objective": "Use input and conditionals to simulate choosing from a menu.",
+    "instructions": "Ask the user for option 1, 2, or 3. With test input 2, print Settings.",
+    "engine": "brython",
+    "starter": "option = input(\"Choose 1 Play, 2 Settings, 3 Exit: \")\nif option == \"1\":\n    print(\"Play\")\nelif option == \"2\":\n    print(\"Settings\")\nelse:\n    print(\"Exit\")",
+    "testInputs": [
+      "2"
+    ],
+    "expectedContains": [
+      "Settings"
+    ],
+    "requiredCode": [
+      "input",
+      "if",
+      "elif"
+    ]
+  },
+  {
+    "id": "CH21-E01",
+    "chapter": 21,
+    "level": "Chapter 21",
+    "topic": "Print formatting and strings",
+    "title": "Formatted score",
+    "objective": "Format a decimal number to two decimal places.",
+    "instructions": "Store score = 3.14159 and print it with two decimal places. The output must include 3.14.",
+    "engine": "brython",
+    "starter": "score = 3.14159\nprint(f\"Score: {score:.2f}\")",
+    "testInputs": [],
+    "expectedContains": [
+      "3.14"
+    ],
+    "requiredCode": [
+      "f\"",
+      ":.2f"
+    ]
+  },
+  {
+    "id": "CH21-E02",
+    "chapter": 21,
+    "level": "Chapter 21",
+    "topic": "Print formatting and strings",
+    "title": "String tools",
+    "objective": "Use string methods to transform text.",
+    "instructions": "Store the text python lab. Print it in uppercase and print its length.",
+    "engine": "brython",
+    "starter": "text = \"python lab\"\nprint(text.upper())\nprint(\"Length:\", len(text))",
+    "testInputs": [],
+    "expectedContains": [
+      "PYTHON LAB",
+      "10"
+    ],
+    "requiredCode": [
+      ".upper",
+      "len"
+    ]
+  },
+  {
+    "id": "CH22-E01",
+    "chapter": 22,
+    "level": "Chapter 22",
+    "topic": "File input and output",
+    "title": "Read lines from text",
+    "objective": "Practice file-like thinking using a multiline string in the browser.",
+    "instructions": "Use splitlines() to count the lines in a multiline string. The output must include 3.",
+    "engine": "brython",
+    "starter": "text = \"apple\\nbanana\\ncherry\"\nlines = text.splitlines()\nprint(\"Line count:\", len(lines))",
+    "testInputs": [],
+    "expectedContains": [
+      "Line count",
+      "3"
+    ],
+    "requiredCode": [
+      "splitlines",
+      "len"
+    ]
+  },
+  {
+    "id": "CH22-E02",
+    "chapter": 22,
+    "level": "Chapter 22",
+    "topic": "File input and output",
+    "title": "Mock save data",
+    "objective": "Represent saved data using a dictionary and JSON text.",
+    "instructions": "Create a dictionary with a player and score, convert it to JSON text, and print Saved.",
+    "engine": "brython",
+    "starter": "import json\n\ndata = {\"player\": \"Ana\", \"score\": 50}\nsaved_text = json.dumps(data)\nprint(\"Saved:\", saved_text)",
+    "testInputs": [],
+    "expectedContains": [
+      "Saved",
+      "Ana",
+      "50"
+    ],
+    "requiredCode": [
+      "import json",
+      "dumps",
+      "{"
+    ]
+  },
+  {
+    "id": "CH23-E01",
+    "chapter": 23,
+    "level": "Chapter 23",
+    "topic": "Randomness",
+    "title": "Dice simulator",
+    "objective": "Use the random module to simulate a die roll.",
+    "instructions": "Use random.randint(1, 6) to create a dice simulator and print Dice roll.",
+    "engine": "brython",
+    "starter": "import random\nroll = random.randint(1, 6)\nprint(\"Dice roll:\", roll)",
+    "testInputs": [],
+    "expectedContains": [
+      "Dice roll"
+    ],
+    "requiredCode": [
+      "import random",
+      "randint"
+    ]
+  },
+  {
+    "id": "CH23-E02",
+    "chapter": 23,
+    "level": "Chapter 23",
+    "topic": "Randomness",
+    "title": "Simple card deck",
+    "objective": "Use lists and loops to create combinations.",
+    "instructions": "Create a list of suits and values. Build a 12-card mini deck and print the deck size.",
+    "engine": "brython",
+    "starter": "suits = [\"hearts\", \"spades\", \"clubs\"]\nvalues = [\"A\", \"2\", \"3\", \"4\"]\ndeck = []\nfor suit in suits:\n    for value in values:\n        deck.append(value + \" of \" + suit)\nprint(\"Deck size:\", len(deck))",
+    "testInputs": [],
+    "expectedContains": [
+      "Deck size",
+      "12"
+    ],
+    "requiredCode": [
+      "for",
+      "append",
+      "len"
+    ]
+  },
+  {
+    "id": "CH24-E01",
+    "chapter": 24,
+    "level": "Chapter 24",
+    "topic": "Computer simulations",
+    "title": "Lander height step",
+    "objective": "Simulate one step of changing position with variables.",
+    "instructions": "Start height at 100 and velocity at -5. Update height once and print the new height. The output must include 95.",
+    "engine": "brython",
+    "starter": "height = 100\nvelocity = -5\nheight = height + velocity\nprint(\"New height:\", height)",
+    "testInputs": [],
+    "expectedContains": [
+      "95"
+    ],
+    "requiredCode": [
+      "height",
+      "velocity",
+      "+"
+    ]
+  },
+  {
+    "id": "CH24-E02",
+    "chapter": 24,
+    "level": "Chapter 24",
+    "topic": "Computer simulations",
+    "title": "Virtual pet hunger",
+    "objective": "Use a loop to simulate a value changing over time.",
+    "instructions": "Start hunger at 0. Increase it three times in a loop. Print the final hunger value.",
+    "engine": "brython",
+    "starter": "hunger = 0\nfor minute in range(3):\n    hunger = hunger + 1\nprint(\"Hunger:\", hunger)",
+    "testInputs": [],
+    "expectedContains": [
+      "Hunger",
+      "3"
+    ],
+    "requiredCode": [
+      "for",
+      "range",
+      "hunger"
+    ]
+  },
+  {
+    "id": "CH25-E01",
+    "chapter": 25,
+    "level": "Chapter 25",
+    "topic": "What's next",
+    "title": "Programming roadmap",
+    "objective": "Reflect on future programming goals using lists and output.",
+    "instructions": "Create a list with three Python topics you want to keep practicing and print each topic.",
+    "engine": "brython",
+    "starter": "topics = [\"functions\", \"data\", \"projects\"]\nfor topic in topics:\n    print(\"Next topic:\", topic)",
+    "testInputs": [],
+    "expectedContains": [
+      "Next topic"
+    ],
+    "requiredCode": [
+      "[",
+      "for"
+    ]
+  },
+  {
+    "id": "CH25-E02",
+    "chapter": 25,
+    "level": "Chapter 25",
+    "topic": "What's next",
+    "title": "Mini capstone report",
+    "objective": "Combine variables, lists, loops, conditionals, and functions in one small program.",
+    "instructions": "Create a function that receives a list of scores and returns Mastery if the average is 4.0 or higher. Use scores [4, 5, 4] and print Report ready.",
+    "engine": "brython",
+    "starter": "def status(scores):\n    average = sum(scores) / len(scores)\n    if average >= 4.0:\n        return \"Mastery\"\n    return \"Needs revision\"\n\nscores = [4, 5, 4]\nprint(\"Status:\", status(scores))\nprint(\"Report ready\")",
+    "testInputs": [],
+    "expectedContains": [
+      "Mastery",
+      "Report ready"
+    ],
+    "requiredCode": [
+      "def status",
+      "if",
+      "return",
+      "sum"
+    ]
+  }
+];
+
+    const examples = {
+      basics: `name = input("What is your name? ")
+age = int(input("How old are you? "))
+
+print("Hello,", name)
+print("Next year you will be", age + 1)
+
+if age >= 18:
+    print("Adult")
+else:
+    print("Minor")`,
+
+      data: `import numpy as np
+import pandas as pd
+import matplotlib.pyplot as plt
+
+scores = np.array([3.2, 4.1, 3.8, 4.6, 2.9, 5.0])
+df = pd.DataFrame({
+    "student": ["A", "B", "C", "D", "E", "F"],
+    "score": scores
+})
+
+print(df)
+print()
+print("Average:", scores.mean())
+print("Highest:", scores.max())
+
+plt.figure()
+plt.bar(df["student"], df["score"])
+plt.title("Student Scores")
+plt.xlabel("Student")
+plt.ylabel("Score")
+plt.show()`,
+
+      gui: `import gui
+
+gui.clear()
+gui.title("Simple Python GUI")
+gui.text("This interface was created from Python code.")
+gui.input("nameBox", "Write your name")
+
+def greet():
+    name = gui.value("nameBox")
+    gui.text("Hello, " + name + "!")
+
+gui.button("Greet", greet)
+gui.button("Clear GUI", gui.clear)
+
+print("The GUI is ready.")`
+    };
+
+    window.addEventListener('load', function () {
+      setupBrowserGuiBridge();
+      setupLearningPath();
+      configureAccountControls();
+      engineSelect.value = localStorage.getItem('pythonIdeEngine') || 'brython';
+
+      updateEditor();
+      changeEngine();
+      startBrythonRuntime();
+      switchWorkspace(activeWorkspace, false);
+    });
+
+    editor.addEventListener('input', function () {
+      saveEditorDraft();
+      updateEditor();
+    });
+
+    editor.addEventListener('scroll', syncScroll);
+
+
+    editor.addEventListener('keydown', function (event) {
+      if ((event.ctrlKey || event.metaKey) && event.key === 'Enter') {
+        event.preventDefault();
+        runPythonCode();
+      }
+    });
+
+    editor.addEventListener('keydown', function (event) {
+      if (event.key === 'Tab') {
+        event.preventDefault();
+
+        const start = this.selectionStart;
+        const end = this.selectionEnd;
+
+        this.value = this.value.substring(0, start) + '    ' + this.value.substring(end);
+        this.selectionStart = this.selectionEnd = start + 4;
+
+        saveEditorDraft();
+        updateEditor();
+      }
+    });
+
+    shellInput.addEventListener('keydown', function (event) {
+      if (event.key === 'Enter' && !event.shiftKey) {
+        event.preventDefault();
+        runShellCommand();
+        return;
+      }
+
+      if (event.key === 'ArrowUp' && !shellInput.value.includes('\n')) {
+        event.preventDefault();
+        moveShellHistory(-1);
+        return;
+      }
+
+      if (event.key === 'ArrowDown' && !shellInput.value.includes('\n')) {
+        event.preventDefault();
+        moveShellHistory(1);
+        return;
+      }
+
+      if (event.key === 'Tab') {
+        event.preventDefault();
+        const start = shellInput.selectionStart;
+        const end = shellInput.selectionEnd;
+        shellInput.value = shellInput.value.substring(0, start) + '    ' + shellInput.value.substring(end);
+        shellInput.selectionStart = shellInput.selectionEnd = start + 4;
+      }
+    });
+
+    function switchWorkspace(mode, remember) {
+      activeWorkspace = mode === 'shell' ? 'shell' : 'editor';
+      const showingShell = activeWorkspace === 'shell';
+
+      scriptEditorPane.hidden = showingShell;
+      pythonShellPane.hidden = !showingShell;
+      scriptEditorActions.hidden = showingShell;
+      shellActions.hidden = !showingShell;
+
+      editorTab.classList.toggle('active', !showingShell);
+      shellTab.classList.toggle('active', showingShell);
+      editorTab.setAttribute('aria-selected', String(!showingShell));
+      shellTab.setAttribute('aria-selected', String(showingShell));
+      updatePrimaryRunButton();
+
+      if (remember !== false) {
+        localStorage.setItem('pythonLabWorkspace', activeWorkspace);
+      }
+
+      window.setTimeout(function () {
+        if (showingShell) {
+          shellInput.focus();
+        } else {
+          editor.focus();
+          updateEditor();
+        }
+      }, 0);
+    }
+
+    function updatePrimaryRunButton() {
+      const runButton = document.getElementById('runButton');
+
+      if (!runButton || runButton.disabled) {
+        return;
+      }
+
+      runButton.textContent = activeWorkspace === 'shell'
+        ? '▶ Run Shell Line'
+        : '▶ Run Python';
+    }
+
+    function runCurrentWorkspace() {
+      return activeWorkspace === 'shell'
+        ? runShellCommand()
+        : runPythonCode();
+    }
+
+    function clearCurrentWorkspace() {
+      if (activeWorkspace === 'shell') {
+        clearPythonShell();
+        return;
+      }
+
+      clearEditor();
+    }
+
+    function appendShellText(text) {
+      shellTranscript.textContent += normalizeOutput(text);
+      shellTranscript.scrollTop = shellTranscript.scrollHeight;
+    }
+
+    function appendShellResult(text) {
+      const normalized = normalizeOutput(text);
+      appendShellText(normalized);
+
+      if (outputBox.textContent === 'No output yet.') {
+        outputBox.textContent = '';
+      }
+
+      outputBox.textContent += normalized;
+      outputBox.scrollTop = outputBox.scrollHeight;
+    }
+
+    function appendShellPrompt(command) {
+      const lines = String(command).replace(/\r\n/g, '\n').split('\n');
+      const displayed = lines.map(function (line, index) {
+        return (index === 0 ? '>>> ' : '... ') + line;
+      }).join('\n');
+
+      appendShellText(displayed + '\n');
+    }
+
+    function clearPythonShell() {
+      shellTranscript.textContent =
+        'GLM Python Shell\n' +
+        'Screen cleared. Your variables and functions are still available.\n\n';
+      shellInput.focus();
+    }
+
+    async function restartPythonShell() {
+      if (brythonReady && window.resetBrythonShell) {
+        window.resetBrythonShell();
+      }
+
+      if (pyodideShellGlobals && pyodideShellGlobals.destroy) {
+        pyodideShellGlobals.destroy();
+      }
+
+      pyodideShellGlobals = null;
+      shellHistory = [];
+      shellHistoryIndex = 0;
+      shellTranscript.textContent =
+        'GLM Python Shell\n' +
+        'Session restarted. Previous variables and functions were removed.\n\n';
+      setStatus('ok', 'Python Shell session restarted.');
+      shellInput.focus();
+    }
+
+    function moveShellHistory(direction) {
+      if (shellHistory.length === 0) {
+        return;
+      }
+
+      shellHistoryIndex = Math.max(0, Math.min(
+        shellHistory.length,
+        shellHistoryIndex + direction
+      ));
+
+      shellInput.value = shellHistoryIndex < shellHistory.length
+        ? shellHistory[shellHistoryIndex]
+        : '';
+      shellInput.setSelectionRange(shellInput.value.length, shellInput.value.length);
+    }
+
+    async function runShellCommand() {
+      const command = shellInput.value.replace(/\r\n/g, '\n');
+
+      if (!command.trim()) {
+        shellInput.focus();
+        return;
+      }
+
+      shellHistory.push(command);
+      shellHistoryIndex = shellHistory.length;
+      appendShellPrompt(command);
+      outputBox.textContent = '';
+      shellInput.value = '';
+      shellRunButton.disabled = true;
+      shellRunButton.textContent = 'Running...';
+      const primaryRunButton = document.getElementById('runButton');
+      primaryRunButton.disabled = true;
+      primaryRunButton.textContent = 'Running...';
+      shellCaptureActive = true;
+
+      try {
+        if (getEngine() === 'brython') {
+          if (!brythonReady || !window.runBrythonShellCommand) {
+            appendShellResult('Brython is not ready yet. Please try again.\n');
+            setStatus('bad', 'Brython is not ready.');
+            return;
+          }
+
+          window.runBrythonShellCommand(command);
+          setStatus('ok', 'Shell command finished with Brython.');
+          return;
+        }
+
+        await runPyodideShellCommand(command);
+
+      } finally {
+        shellCaptureActive = false;
+        shellRunButton.disabled = false;
+        shellRunButton.textContent = 'Run line';
+        primaryRunButton.disabled = false;
+        updatePrimaryRunButton();
+        shellInput.focus();
+      }
+    }
+
+    async function runPyodideShellCommand(command) {
+      await initializePyodide();
+
+      if (!pyodideReady) {
+        appendShellResult('Pyodide could not start.\n');
+        return;
+      }
+
+      if (!pyodideShellGlobals) {
+        pyodideShellGlobals = pyodide.runPython('{' +
+          '"__name__": "__main__", ' +
+          '"__package__": None' +
+        '}');
+      }
+
+      setStatus('neutral', 'Running shell command with Pyodide...');
+
+      try {
+        try {
+          await pyodide.loadPackagesFromImports(command);
+        } catch (autoLoadError) {
+          appendShellResult('Package auto-loading warning: ' + String(autoLoadError) + '\n');
+        }
+
+        const result = await pyodide.runPythonAsync(command, {
+          globals: pyodideShellGlobals
+        });
+
+        if (result !== undefined && result !== null) {
+          let displayValue = '';
+
+          try {
+            displayValue = result && typeof result.toString === 'function'
+              ? result.toString()
+              : String(result);
+          } finally {
+            if (result && result.destroy && result !== pyodideShellGlobals) {
+              result.destroy();
+            }
+          }
+
+          if (displayValue !== 'None') {
+            appendShellResult(displayValue + '\n');
+          }
+        }
+
+        setStatus('ok', 'Shell command finished with Pyodide.');
+
+      } catch (error) {
+        appendShellResult(String(error) + '\n');
+        setStatus('bad', 'Python Shell error.');
+      }
+    }
+
+    function startBrythonRuntime() {
+      try {
+        brython();
+        brythonReady = true;
+
+        if (getEngine() === 'brython') {
+          setStatus('ok', 'Brython is ready.');
+          document.getElementById('runtimeInfo').textContent =
+            'Ready. Brython runs basic Python quickly in the browser.';
+        }
+      } catch (error) {
+        setStatus('bad', 'Brython failed to start.');
+        appendLine(String(error));
+      }
+    }
+
+    function getEngine() {
+      return engineSelect.value;
+    }
+
+    function changeEngine() {
+      const engine = getEngine();
+      localStorage.setItem('pythonIdeEngine', engine);
+
+      if (engine === 'brython') {
+        enginePill.textContent = 'Brython selected';
+        engineHelp.innerHTML = '<strong>Brython:</strong> best for variables, conditionals, loops, functions, lists, dictionaries, input(), print(), and browser GUI activities.';
+        librariesPanel.classList.add('disabled-panel');
+        loadLibrariesButton.disabled = true;
+        libraryHint.textContent = 'External library loading is disabled in Brython. Use Pyodide for numpy, pandas, matplotlib, scipy, and similar libraries.';
+
+        if (brythonReady) {
+          setStatus('ok', 'Brython is ready.');
+        } else {
+          setStatus('neutral', 'Starting Brython...');
+        }
+      }
+
+      if (engine === 'pyodide') {
+        enginePill.textContent = 'Pyodide selected';
+        engineHelp.innerHTML = '<strong>Pyodide:</strong> best for numpy, pandas, matplotlib, CSV files, scientific computing, and data visualization.';
+        librariesPanel.classList.remove('disabled-panel');
+        loadLibrariesButton.disabled = false;
+        libraryHint.textContent = 'Select packages and click Load Libraries, or run code and Pyodide will try to auto-load imports.';
+
+        if (pyodideReady) {
+          setStatus('ok', 'Pyodide is ready.');
+        } else {
+          setStatus('neutral', 'Pyodide selected. It will load when you run code or load libraries.');
+        }
+      }
+    }
+
+    async function initializePyodide() {
+      if (pyodideReady) {
+        return;
+      }
+
+      try {
+        setStatus('neutral', 'Loading Pyodide runtime...');
+        document.getElementById('runtimeInfo').textContent =
+          'Pyodide is starting. The first load may take a moment.';
+
+        pyodide = await loadPyodide({
+          indexURL: 'https://cdn.jsdelivr.net/pyodide/v0.29.4/full/'
+        });
+
+        pyodide.setStdout({
+          batched: function (text) {
+            appendOutput(text);
+          }
+        });
+
+        pyodide.setStderr({
+          batched: function (text) {
+            appendOutput(text);
+          }
+        });
+
+        pyodide.setStdin({
+          stdin: function () {
+            return getNextPythonInput('Python input() is asking for a value:');
+          }
+        });
+
+        await setupPyodideGuiModule();
+
+        pyodideReady = true;
+        setStatus('ok', 'Pyodide is ready.');
+        document.getElementById('runtimeInfo').textContent =
+          'Ready. You can run Python code and load supported Pyodide libraries.';
+
+      } catch (err) {
+        setStatus('bad', 'Pyodide failed to load.');
+        appendLine(String(err));
+      }
+    }
+
+    async function setupPyodideGuiModule() {
+      await pyodide.runPythonAsync(`
+import sys
+import types
+from js import webgui
+
+gui = types.ModuleType("gui")
+
+def clear():
+    webgui.clear()
+
+def title(text):
+    webgui.title(str(text))
+
+def text(value):
+    webgui.text(str(value))
+
+def input(id, placeholder=""):
+    webgui.input(str(id), str(placeholder))
+
+def value(id):
+    return str(webgui.value(str(id)))
+
+def button(label, callback):
+    webgui.button(str(label), callback)
+
+def html(markup):
+    webgui.html(str(markup))
+
+gui.clear = clear
+gui.title = title
+gui.text = text
+gui.input = input
+gui.value = value
+gui.button = button
+gui.html = html
+
+sys.modules["gui"] = gui
+`);
+    }
+
+    function setupBrowserGuiBridge() {
+      window.webgui = {
+        clear: function () {
+          guiPreview.innerHTML = '';
+          guiPreview.className = '';
+        },
+
+        title: function (text) {
+          guiPreview.className = '';
+          const h = document.createElement('h3');
+          h.textContent = text;
+          guiPreview.appendChild(h);
+        },
+
+        text: function (text) {
+          guiPreview.className = '';
+          const p = document.createElement('p');
+          p.textContent = text;
+          guiPreview.appendChild(p);
+        },
+
+        input: function (id, placeholder) {
+          guiPreview.className = '';
+          const input = document.createElement('input');
+          input.id = 'gui_' + id;
+          input.placeholder = placeholder || '';
+          guiPreview.appendChild(input);
+        },
+
+        value: function (id) {
+          const element = document.getElementById('gui_' + id);
+          return element ? element.value : '';
+        },
+
+        button: function (label, callback) {
+          guiPreview.className = '';
+          const button = document.createElement('button');
+          button.textContent = label;
+          button.onclick = function () {
+            try {
+              callback();
+            } catch (err) {
+              appendLine('GUI error: ' + String(err));
+            }
+          };
+          guiPreview.appendChild(button);
+        },
+
+        html: function (markup) {
+          guiPreview.className = '';
+          const div = document.createElement('div');
+          div.innerHTML = markup;
+          guiPreview.appendChild(div);
+        }
+      };
+    }
+
+
+    function setupLearningPath() {
+      exerciseList.innerHTML = '';
+
+      learningPath.forEach(function (exercise, index) {
+        const card = document.createElement('div');
+        card.className = 'exercise-card';
+        card.id = 'exerciseCard_' + exercise.id;
+        card.onclick = function () {
+          selectExercise(exercise.id, false);
+        };
+
+        const saved = localProgress[exercise.id];
+        const savedStatus = saved ? saved.status : 'Not started';
+
+        card.innerHTML =
+          '<h3>' + escapeHtml(exercise.title) + '</h3>' +
+          '<p>' + escapeHtml(exercise.objective) + '</p>' +
+          '<div class="exercise-meta">' +
+          '<span class="level-tag">' + escapeHtml(exercise.level) + '</span>' +
+          '<span class="level-tag">' + escapeHtml(exercise.topic) + '</span>' +
+          '<span class="status-tag" id="statusTag_' + exercise.id + '">' + escapeHtml(savedStatus) + '</span>' +
+          '</div>';
+
+        exerciseList.appendChild(card);
+      });
+
+      selectExercise(activeExerciseId, false);
+      updateExerciseCounter();
+    }
+
+    function getExercise(id) {
+      return learningPath.find(function (exercise) {
+        return exercise.id === id;
+      }) || learningPath[0];
+    }
+
+    function draftKey(id) {
+      return activeAccount ? 'pythonLabDraft:' + activeAccount.uid + ':' + id : null;
+    }
+
+    function saveEditorDraft() {
+      const key = draftKey(activeExerciseId);
+      if (key) localStorage.setItem(key, editor.value);
+    }
+
+    function selectExercise(id, loadStarter) {
+      if (activeExerciseId !== id) saveEditorDraft();
+      activeExerciseId = getExercise(id).id;
+
+      document.querySelectorAll('.exercise-card').forEach(function (card) {
+        card.classList.remove('active');
+      });
+      const card = document.getElementById('exerciseCard_' + activeExerciseId);
+      if (card) card.classList.add('active');
+
+      const exercise = getExercise(activeExerciseId);
+      const saved = localProgress[activeExerciseId];
+      const savedInfo = saved
+        ? '<br><strong>Last saved:</strong> ' + escapeHtml(saved.status) + ' · ' + escapeHtml(saved.score + '%') + ' · ' + escapeHtml(saved.savedAt || '')
+        : '';
+      exerciseDetails.innerHTML =
+        '<strong>' + escapeHtml(exercise.level + ' · ' + exercise.topic) + '</strong><br>' +
+        '<strong>' + escapeHtml(exercise.title) + '</strong><br>' +
+        escapeHtml(exercise.instructions) +
+        '<br><strong>Recommended engine:</strong> ' + escapeHtml(exercise.engine) +
+        savedInfo;
+
+      engineSelect.value = exercise.engine;
+      changeEngine();
+      const key = draftKey(activeExerciseId);
+      const draft = key ? localStorage.getItem(key) : null;
+      editor.value = loadStarter ? exercise.starter :
+        draft !== null ? draft : saved && typeof saved.code === 'string' ? saved.code : exercise.starter;
+      studentReflection.value = saved && saved.reflection || '';
+      updateEditor();
+      updateExerciseCounter();
+    }
+
+    function loadSelectedExerciseStarter() {
+      editor.value = getExercise(activeExerciseId).starter;
+      saveEditorDraft();
+      updateEditor();
+      outputBox.textContent = 'Starter code loaded.';
+      setStatus('neutral', 'Starter code loaded.');
+    }
+
+    function updateExerciseCounter() {
+      const completed = Object.keys(localProgress).filter(function (key) {
+        const status = localProgress[key].status;
+        return status === 'Completed' || status === 'Mastery evidence';
+      }).length;
+      exerciseCounter.textContent = completed + ' / ' + learningPath.length;
+    }
+
+    function configureAccountControls() {
+      const bridge = window.pythonLabAccount;
+      document.getElementById('signInButton').disabled = !bridge || !bridge.configured;
+      if (!bridge || !bridge.configured) {
+        setSaveStatus('neutral', 'Online accounts need setup. You can still practice and download your .py file.');
+      }
+    }
+
+    window.addEventListener('pythonlab-ready', configureAccountControls);
+    window.addEventListener('pythonlab-error', function (event) {
+      setSaveStatus('bad', 'Account service unavailable: ' + event.detail);
+    });
+    window.addEventListener('pythonlab-auth', function (event) {
+      const user = event.detail;
+      const changedUser = (activeAccount && activeAccount.uid) !== (user && user.uid);
+      activeAccount = user;
+      studentEmailInput.value = user ? user.email : '';
+      studentNameInput.value = user
+        ? localStorage.getItem('pythonLabName:' + user.uid) || user.name || ''
+        : '';
+      document.getElementById('signInButton').hidden = Boolean(user);
+      document.getElementById('signOutButton').hidden = !user;
+      document.getElementById('profileButton').hidden = !user;
+      document.getElementById('loadProgressButton').hidden = !user;
+      updateProfilePill();
+      if (changedUser) {
+        localProgress = {};
+        // Remove the previous student's code and results from the visible workspace.
+        editor.value = '';
+        outputBox.textContent = 'No output yet.';
+        studentReflection.value = '';
+        setupLearningPath();
+        if (user) loadMyProgress();
+        else setSaveStatus('neutral', 'Signed out. Sign in to save or load progress.');
+      }
+    });
+
+    async function signInStudent() {
+      try {
+        await window.pythonLabAccount.signIn();
+      } catch (error) {
+        setSaveStatus('bad', error.message || String(error));
+      }
+    }
+
+    async function signOutStudent() {
+      try {
+        await window.pythonLabAccount.signOut();
+      } catch (error) {
+        setSaveStatus('bad', error.message || String(error));
+      }
+    }
+
+    function saveStudentProfile() {
+      const validation = validateStudentProfile();
+      if (!validation.ok) {
+        setSaveStatus('bad', validation.message);
+        return false;
+      }
+      localStorage.setItem('pythonLabName:' + activeAccount.uid, validation.name);
+      setSaveStatus('ok', 'Name saved for this browser. Your work is saved when you use Save Draft or Evaluate & Save.');
+      return true;
+    }
+
+    function updateProfilePill() {
+      profilePill.textContent = activeAccount ? 'Signed in: ' + activeAccount.email : 'Signed out';
+      profilePill.style.background = activeAccount ? '#dcfae6' : '#eef4ff';
+      profilePill.style.color = activeAccount ? 'var(--success)' : 'var(--blue)';
+    }
+
+    function validateStudentProfile() {
+      if (!activeAccount) {
+        return { ok: false, message: 'Sign in with your GLM Google account before saving.' };
+      }
+      const name = studentNameInput.value.trim();
+      if (name.length < 3 || name.length > 120) {
+        return { ok: false, message: 'Please write your full name (3–120 characters).' };
+      }
+      return { ok: true, name: name, email: activeAccount.email };
+    }
+
+    function getNextPythonInput(promptText) {
+      if (currentAutoInputs.length > 0) {
+        const nextValue = currentAutoInputs.shift();
+        appendLine('[Auto input] ' + String(nextValue));
+        return String(nextValue);
+      }
+
+      const answer = window.prompt(promptText || 'Python input() is asking for a value:');
+      return answer === null ? '' : answer;
+    }
+
+    function recordRunResult(ok, statusMessage) {
+      lastRun = {
+        ok: Boolean(ok),
+        status: statusMessage || (ok ? 'Program finished.' : 'Python error.'),
+        output: outputBox.textContent,
+        engine: getEngine(),
+        at: new Date().toISOString()
+      };
+    }
+
+    function evaluateExerciseResult(exercise, runOk) {
+      const code = editor.value;
+      const output = normalizeForCheck(outputBox.textContent);
+      const missingOutput = [];
+      const missingCode = [];
+
+      (exercise.expectedContains || []).forEach(function (expected) {
+        if (!output.includes(normalizeForCheck(expected))) {
+          missingOutput.push(expected);
+        }
+      });
+
+      (exercise.requiredCode || []).forEach(function (required) {
+        if (!normalizeForCheck(code).includes(normalizeForCheck(required))) {
+          missingCode.push(required);
+        }
+      });
+
+      const checks = (exercise.expectedContains || []).length + (exercise.requiredCode || []).length + 1;
+      const passed = (runOk ? 1 : 0) +
+        ((exercise.expectedContains || []).length - missingOutput.length) +
+        ((exercise.requiredCode || []).length - missingCode.length);
+
+      const score = Math.max(0, Math.round((passed / Math.max(1, checks)) * 100));
+      const passedAll = runOk && missingOutput.length === 0 && missingCode.length === 0;
+
+      let feedback = '';
+
+      if (!runOk) {
+        feedback += 'The program has a Python/runtime error. ';
+      }
+
+      if (missingOutput.length > 0) {
+        feedback += 'Missing expected output: ' + missingOutput.join(', ') + '. ';
+      }
+
+      if (missingCode.length > 0) {
+        feedback += 'Check required structure: ' + missingCode.join(', ') + '. ';
+      }
+
+      if (passedAll) {
+        feedback = 'All automatic checks passed.';
+      }
+
+      return {
+        passedAll: passedAll,
+        score: score,
+        feedback: feedback.trim(),
+        missingOutput: missingOutput,
+        missingCode: missingCode
+      };
+    }
+
+    function normalizeForCheck(value) {
+      return String(value)
+        .toLowerCase()
+        .replace(/\r\n/g, '\n')
+        .replace(/\\n/g, '\n')
+        .replace(/\s+/g, ' ')
+        .trim();
+    }
+
+    async function evaluateAndSaveProgress() {
+      if (!saveStudentProfile()) {
+        return;
+      }
+
+      const exercise = getExercise(activeExerciseId);
+      currentAutoInputs = (exercise.testInputs || []).slice();
+
+      await runPythonCode();
+
+      const evaluation = evaluateExerciseResult(exercise, lastRun.ok === true);
+      const automaticStatus = evaluation.passedAll ? 'Mastery evidence' : (lastRun.ok ? 'Needs revision' : 'Needs revision');
+
+      manualStatus.value = automaticStatus;
+
+      await submitProgress(automaticStatus, evaluation);
+    }
+
+    async function saveManualProgress() {
+      if (!saveStudentProfile()) {
+        return;
+      }
+
+      const exercise = getExercise(activeExerciseId);
+      const evaluation = {
+        passedAll: false,
+        score: lastRun.ok ? 60 : 0,
+        feedback: 'Manual save. No automatic evaluation was requested.',
+        missingOutput: [],
+        missingCode: []
+      };
+
+      await submitProgress(manualStatus.value, evaluation);
+    }
+
+    async function submitProgress(statusValue, evaluation) {
+      if (savingProgress) return;
+      const validation = validateStudentProfile();
+      if (!validation.ok) {
+        setSaveStatus('bad', validation.message);
+        return;
+      }
+      const accountAtStart = activeAccount.uid;
+      const exercise = getExercise(activeExerciseId);
+      const payload = {
+        studentName: validation.name,
+        studentEmail: validation.email,
+        exerciseId: exercise.id,
+        level: exercise.level,
+        topic: exercise.topic,
+        title: exercise.title,
+        engine: getEngine(),
+        status: statusValue,
+        score: evaluation.score,
+        passed: evaluation.passedAll,
+        feedback: evaluation.feedback,
+        reflection: studentReflection.value.trim(),
+        code: editor.value,
+        output: outputBox.textContent,
+        testInputs: (exercise.testInputs || []).join(' | '),
+        expectedChecks: (exercise.expectedContains || []).join(' | ')
+      };
+      savingProgress = true;
+      document.getElementById('saveDraftButton').disabled = true;
+      document.getElementById('saveRunButton').disabled = true;
+      setSaveStatus('neutral', 'Saving to your account...');
+      try {
+        const saved = await window.pythonLabAccount.save(payload);
+        if (!activeAccount || activeAccount.uid !== accountAtStart) return;
+        localProgress[exercise.id] = { ...payload, savedAt: saved.savedAt, attemptNumber: saved.attemptNumber };
+        saveEditorDraft();
+        refreshExerciseStatus(exercise.id);
+        updateExerciseCounter();
+        selectExercise(exercise.id, false);
+        setSaveStatus('ok', 'Saved to your account. Attempt ' + saved.attemptNumber + '.');
+      } catch (error) {
+        setSaveStatus('bad', 'Could not save: ' + (error.message || String(error)));
+      } finally {
+        savingProgress = false;
+        document.getElementById('saveDraftButton').disabled = false;
+        document.getElementById('saveRunButton').disabled = false;
+      }
+    }
+
+    function refreshExerciseStatus(exerciseId) {
+      const tag = document.getElementById('statusTag_' + exerciseId);
+      const saved = localProgress[exerciseId];
+
+      if (tag && saved) {
+        tag.textContent = saved.status;
+      }
+    }
+
+    function setSaveStatus(type, message) {
+      const css = type === 'ok'
+        ? 'background:#dcfae6;color:var(--success);'
+        : type === 'bad'
+          ? 'background:#fee4e2;color:var(--error);'
+          : 'background:#eef4ff;color:var(--blue);';
+
+      saveStatusBox.style = css;
+      saveStatusBox.innerHTML = '<strong>Status:</strong> ' + escapeHtml(message);
+    }
+
+    async function loadMyProgress() {
+      if (!activeAccount) {
+        setSaveStatus('bad', 'Sign in with your GLM Google account first.');
+        return;
+      }
+      const accountAtStart = activeAccount.uid;
+      setSaveStatus('neutral', 'Loading your saved work...');
+      try {
+        const records = await window.pythonLabAccount.load();
+        if (!activeAccount || activeAccount.uid !== accountAtStart) return;
+        localProgress = {};
+        records.forEach(function (item) {
+          if (learningPath.some(function (exercise) { return exercise.id === item.exerciseId; })) {
+            localProgress[item.exerciseId] = item;
+          }
+        });
+        setupLearningPath();
+        setSaveStatus('ok', 'Loaded ' + records.length + ' saved exercise(s).');
+      } catch (error) {
+        setSaveStatus('bad', 'Could not load progress: ' + (error.message || String(error)));
+      }
+    }
+
+    async function loadSelectedPackages(event) {
+      if (getEngine() !== 'pyodide') {
+        appendLine('Library loading is available only with Pyodide.');
+        return;
+      }
+
+      await initializePyodide();
+
+      if (!pyodideReady) {
+        return;
+      }
+
+      const button = event ? event.target : null;
+
+      if (button) {
+        button.disabled = true;
+      }
+
+      try {
+        setStatus('neutral', 'Loading selected libraries...');
+
+        const selected = Array.from(document.querySelectorAll('.library-grid input:checked'))
+          .map(function (input) {
+            return input.value.trim();
+          })
+          .filter(Boolean);
+
+        const extra = document.getElementById('extraPackages').value
+          .split(',')
+          .map(function (p) {
+            return p.trim();
+          })
+          .filter(Boolean);
+
+        const packages = Array.from(new Set(selected.concat(extra)));
+
+        if (packages.length === 0) {
+          appendLine('No packages selected.');
+          setStatus('ok', 'Ready.');
+          return;
+        }
+
+        appendLine('Loading packages: ' + packages.join(', '));
+
+        for (const pkg of packages) {
+          try {
+            if (pkg === 'sqlite3') {
+              appendLine('sqlite3 is normally part of Python standard library.');
+              continue;
+            }
+
+            await pyodide.loadPackage(pkg);
+            appendLine('Loaded: ' + pkg);
+
+          } catch (loadErr) {
+            appendLine('Trying micropip for: ' + pkg);
+
+            try {
+              await pyodide.loadPackage('micropip');
+              const safePkg = JSON.stringify(pkg);
+
+              await pyodide.runPythonAsync(`
+import micropip
+await micropip.install(${safePkg})
+`);
+              appendLine('Installed with micropip: ' + pkg);
+
+            } catch (microErr) {
+              appendLine('Could not load ' + pkg + ': ' + String(microErr));
+            }
+          }
+        }
+
+        setStatus('ok', 'Library loading finished.');
+
+      } catch (err) {
+        setStatus('bad', 'Library loading error.');
+        appendLine(String(err));
+
+      } finally {
+        if (button) {
+          button.disabled = false;
+        }
+      }
+    }
+
+    async function runPythonCode() {
+      const runButton = document.getElementById('runButton');
+      runButton.disabled = true;
+      runButton.textContent = 'Running...';
+
+      try {
+        if (getEngine() === 'brython') {
+          if (!brythonReady || !window.runBrythonCode) {
+            appendLine('Brython is not ready yet.');
+            return;
+          }
+
+          window.runBrythonCode();
+          return;
+        }
+
+        await runPyodideCode();
+
+      } finally {
+        runButton.disabled = false;
+        updatePrimaryRunButton();
+      }
+    }
+
+    async function runPyodideCode() {
+      await initializePyodide();
+
+      if (!pyodideReady) {
+        return;
+      }
+
+      resetOutputAreas();
+      setStatus('neutral', 'Running with Pyodide...');
+
+      try {
+        const code = editor.value;
+
+        try {
+          await pyodide.loadPackagesFromImports(code);
+        } catch (autoLoadError) {
+          appendLine('Package auto-loading warning: ' + String(autoLoadError));
+        }
+
+        await pyodide.runPythonAsync(`
+try:
+    import matplotlib
+    matplotlib.use("AGG")
+except Exception:
+    pass
+`);
+
+        await pyodide.runPythonAsync(code);
+        await renderPyodidePlots();
+
+        setStatus('ok', 'Program finished with Pyodide.');
+        recordRunResult(true, 'Program finished with Pyodide.');
+
+      } catch (err) {
+        setStatus('bad', 'Python error.');
+        appendLine(String(err));
+        recordRunResult(false, 'Python error.');
+      }
+    }
+
+    async function renderPyodidePlots() {
+      try {
+        const plotCode = `
+import io
+import base64
+
+_images = []
+
+try:
+    import matplotlib.pyplot as plt
+
+    for number in plt.get_fignums():
+        figure = plt.figure(number)
+        buffer = io.BytesIO()
+        figure.savefig(buffer, format="png", bbox_inches="tight")
+        buffer.seek(0)
+        image_base64 = base64.b64encode(buffer.read()).decode("utf-8")
+        _images.append(image_base64)
+
+    plt.close("all")
+
+except Exception:
+    pass
+
+_images
+`;
+
+        const imagesProxy = await pyodide.runPythonAsync(plotCode);
+        const images = imagesProxy.toJs();
+
+        if (images.length > 0) {
+          plotArea.innerHTML = '';
+          plotArea.className = '';
+        }
+
+        images.forEach(function (imageBase64) {
+          const img = document.createElement('img');
+          img.src = 'data:image/png;base64,' + imageBase64;
+          plotArea.appendChild(img);
+        });
+
+        if (imagesProxy.destroy) {
+          imagesProxy.destroy();
+        }
+
+      } catch (error) {
+        appendLine('Plot rendering error: ' + String(error));
+      }
+    }
+
+    function resetOutputAreas() {
+      outputBox.textContent = '';
+      plotArea.innerHTML = '';
+      plotArea.className = '';
+      guiPreview.innerHTML = '';
+      guiPreview.className = '';
+    }
+
+    function normalizeOutput(text) {
+      return String(text)
+        .replace(/\r\n/g, '\n')
+        .replace(/\\n/g, '\n')
+        .replace(/\\t/g, '\t');
+    }
+
+    function appendOutput(text) {
+      if (shellCaptureActive) {
+        appendShellResult(text);
+        return;
+      }
+
+      if (outputBox.textContent === 'No output yet.') {
+        outputBox.textContent = '';
+      }
+
+      outputBox.textContent += normalizeOutput(text);
+      outputBox.scrollTop = outputBox.scrollHeight;
+    }
+
+    function appendLine(text) {
+      appendOutput(String(text) + '\n');
+    }
+
+    function loadExample(name) {
+      editor.value = examples[name] || examples.basics;
+      saveEditorDraft();
+      updateEditor();
+
+      if (name === 'data') {
+        engineSelect.value = 'pyodide';
+      }
+
+      if (name === 'gui' || name === 'basics') {
+        engineSelect.value = 'brython';
+      }
+
+      changeEngine();
+
+      outputBox.textContent = 'No output yet.';
+      plotArea.innerHTML = 'Matplotlib plots will appear here when using Pyodide.';
+      plotArea.className = 'hint';
+      guiPreview.innerHTML = 'Python browser GUI components will appear here.';
+      guiPreview.className = 'hint';
+
+      setStatus('neutral', 'Example loaded.');
+    }
+
+    function toggleResultFocus(cardId, button) {
+      const dashboard = document.getElementById('liveResults');
+      const card = document.getElementById(cardId);
+      const isFocused = card.classList.contains('result-focus');
+
+      dashboard.querySelectorAll('.result-card').forEach(function (item) {
+        item.classList.remove('result-focus');
+        const focusButton = item.querySelector('.result-focus-button');
+        if (focusButton) {
+          focusButton.textContent = 'Expand';
+        }
+      });
+
+      if (isFocused) {
+        dashboard.classList.remove('has-focus');
+        return;
+      }
+
+      card.classList.add('result-focus');
+      dashboard.classList.add('has-focus');
+      if (button) {
+        button.textContent = 'Restore';
+      }
+    }
+
+    function downloadPythonFile() {
+      const code = editor.value || '';
+      const exercise = typeof getActiveExercise === 'function' ? getActiveExercise() : null;
+      const rawName = exercise && exercise.title ? exercise.title : 'python_lab';
+      const safeName = rawName
+        .toLowerCase()
+        .replace(/[^a-z0-9]+/g, '_')
+        .replace(/^_+|_+$/g, '') || 'python_lab';
+
+      const blob = new Blob([code], { type: 'text/x-python;charset=utf-8' });
+      const url = URL.createObjectURL(blob);
+      const link = document.createElement('a');
+      link.href = url;
+      link.download = safeName + '.py';
+      document.body.appendChild(link);
+      link.click();
+      document.body.removeChild(link);
+      URL.revokeObjectURL(url);
+      setStatus('neutral', 'Python file downloaded.');
+    }
+
+    function copyCode() {
+      if (navigator.clipboard && navigator.clipboard.writeText) {
+        navigator.clipboard.writeText(editor.value)
+          .then(function () {
+            setStatus('neutral', 'Code copied to clipboard.');
+          })
+          .catch(function () {
+            fallbackCopyCode();
+          });
+      } else {
+        fallbackCopyCode();
+      }
+    }
+
+    function fallbackCopyCode() {
+      const temporary = document.createElement('textarea');
+      temporary.value = editor.value;
+      document.body.appendChild(temporary);
+      temporary.select();
+      document.execCommand('copy');
+      document.body.removeChild(temporary);
+      setStatus('neutral', 'Code copied to clipboard.');
+    }
+
+    function clearEditor() {
+      editor.value = '';
+      saveEditorDraft();
+      updateEditor();
+      outputBox.textContent = 'No output yet.';
+      plotArea.innerHTML = 'Matplotlib plots will appear here when using Pyodide.';
+      plotArea.className = 'hint';
+      guiPreview.innerHTML = 'Python browser GUI components will appear here.';
+      guiPreview.className = 'hint';
+      setStatus('neutral', 'Editor cleared.');
+    }
+
+    function updateEditor() {
+      updateLineNumbers();
+      updateHighlight();
+      syncScroll();
+    }
+
+    function updateLineNumbers() {
+      const total = editor.value.split('\n').length;
+      let html = '';
+
+      for (let i = 1; i <= total; i++) {
+        html += i + '<br>';
+      }
+
+      lineNumbers.innerHTML = html;
+    }
+
+    function updateHighlight() {
+      highlight.innerHTML = highlightPython(editor.value) + '\n';
+    }
+
+    function highlightPython(code) {
+      return code.split('\n').map(function (line) {
+        const commentIndex = findPythonCommentIndex(line);
+        const mainPart = commentIndex >= 0 ? line.substring(0, commentIndex) : line;
+        const commentPart = commentIndex >= 0 ? line.substring(commentIndex) : '';
+
+        return highlightPythonNonComment(mainPart) +
+          (commentPart ? '<span class="com">' + escapeHtml(commentPart) + '</span>' : '');
+      }).join('\n');
+    }
+
+    function findPythonCommentIndex(line) {
+      let inString = false;
+      let quote = '';
+      let triple = false;
+
+      for (let i = 0; i < line.length; i++) {
+        const ch = line[i];
+
+        if (!inString && (line.substring(i, i + 3) === '"""' || line.substring(i, i + 3) === "'''")) {
+          inString = true;
+          quote = line.substring(i, i + 3);
+          triple = true;
+          i += 2;
+          continue;
+        }
+
+        if (inString && triple && line.substring(i, i + 3) === quote) {
+          inString = false;
+          triple = false;
+          i += 2;
+          continue;
+        }
+
+        if (!triple && (ch === '"' || ch === "'") && line[i - 1] !== '\\') {
+          if (!inString) {
+            inString = true;
+            quote = ch;
+          } else if (quote === ch) {
+            inString = false;
+          }
+        }
+
+        if (!inString && ch === '#') {
+          return i;
+        }
+      }
+
+      return -1;
+    }
+
+    function highlightPythonNonComment(text) {
+      let result = '';
+      let lastIndex = 0;
+
+      const stringRegex = /("""[\s\S]*?"""|'''[\s\S]*?'''|"(?:[^"\\]|\\.)*"|'(?:[^'\\]|\\.)*')/g;
+      let match;
+
+      while ((match = stringRegex.exec(text)) !== null) {
+        result += highlightPythonPlain(text.substring(lastIndex, match.index));
+        result += '<span class="str">' + escapeHtml(match[0]) + '</span>';
+        lastIndex = match.index + match[0].length;
+      }
+
+      result += highlightPythonPlain(text.substring(lastIndex));
+      return result;
+    }
+
+    function highlightPythonPlain(text) {
+      const tokenRegex =
+        /(\b(?:False|None|True|and|as|assert|async|await|break|class|continue|def|del|elif|else|except|finally|for|from|global|if|import|in|is|lambda|nonlocal|not|or|pass|raise|return|try|while|with|yield|match|case)\b|\b(?:print|input|len|range|int|float|str|list|dict|set|tuple|sum|min|max|abs|round|open|type|enumerate|zip|map|filter|sorted|help|dir)\b|\b\d+(?:\.\d+)?\b|==|!=|<=|>=|\+=|-=|\*=|\/=|\/\/=|%=|\+|-|\*|\/|%|=|<|>|:)/g;
+
+      let result = '';
+      let lastIndex = 0;
+      let match;
+
+      while ((match = tokenRegex.exec(text)) !== null) {
+        result += escapeHtml(text.substring(lastIndex, match.index));
+
+        const token = match[0];
+
+        if (/^\d/.test(token)) {
+          result += '<span class="num">' + escapeHtml(token) + '</span>';
+        } else if (/^(print|input|len|range|int|float|str|list|dict|set|tuple|sum|min|max|abs|round|open|type|enumerate|zip|map|filter|sorted|help|dir)$/.test(token)) {
+          result += '<span class="builtin">' + escapeHtml(token) + '</span>';
+        } else if (/^(==|!=|<=|>=|\+=|-=|\*=|\/=|\/\/=|%=|\+|-|\*|\/|%|=|<|>|:)$/.test(token)) {
+          result += '<span class="op">' + escapeHtml(token) + '</span>';
+        } else {
+          result += '<span class="kw">' + escapeHtml(token) + '</span>';
+        }
+
+        lastIndex = match.index + token.length;
+      }
+
+      result += escapeHtml(text.substring(lastIndex));
+      return result;
+    }
+
+    function syncScroll() {
+      highlight.scrollTop = editor.scrollTop;
+      highlight.scrollLeft = editor.scrollLeft;
+      lineNumbers.scrollTop = editor.scrollTop;
+    }
+
+    function setStatus(type, text) {
+      const status = document.getElementById('status');
+      status.className = 'status ' + type;
+      status.textContent = text;
+    }
+
+    function escapeHtml(text) {
+      return String(text)
+        .replace(/&/g, '&amp;')
+        .replace(/</g, '&lt;')
+        .replace(/>/g, '&gt;');
+    }
+  </script>
+
+  <script type="text/python">
+from browser import window
+import sys
+import traceback
+import builtins
+import types
+
+
+def browser_input(prompt_text=""):
+    return str(window.getNextPythonInput(str(prompt_text)))
+
+
+builtins.input = browser_input
+
+
+class OutputCatcher:
+    def write(self, text):
+        window.appendOutput(str(text))
+        return len(str(text))
+
+    def flush(self):
+        pass
+
+
+def setup_brython_gui_module():
+    gui = types.ModuleType("gui")
+
+    def clear():
+        window.webgui.clear()
+
+    def title(text):
+        window.webgui.title(str(text))
+
+    def text(value):
+        window.webgui.text(str(value))
+
+    def input(id, placeholder=""):
+        window.webgui.input(str(id), str(placeholder))
+
+    def value(id):
+        return str(window.webgui.value(str(id)))
+
+    def button(label, callback):
+        window.webgui.button(str(label), callback)
+
+    def html(markup):
+        window.webgui.html(str(markup))
+
+    gui.clear = clear
+    gui.title = title
+    gui.text = text
+    gui.input = input
+    gui.value = value
+    gui.button = button
+    gui.html = html
+
+    sys.modules["gui"] = gui
+
+
+setup_brython_gui_module()
+
+
+shell_namespace = {
+    '__name__': '__main__'
+}
+
+
+def reset_brython_shell():
+    global shell_namespace
+    shell_namespace = {
+        '__name__': '__main__'
+    }
+
+
+def run_brython_shell_command(command):
+    global shell_namespace
+
+    old_stdout = sys.stdout
+    old_stderr = sys.stderr
+    sys.stdout = OutputCatcher()
+    sys.stderr = OutputCatcher()
+
+    try:
+        source = str(command)
+
+        try:
+            expression = compile(source, '<shell>', 'eval')
+        except SyntaxError:
+            statement = compile(source, '<shell>', 'exec')
+            exec(statement, shell_namespace)
+        else:
+            result = eval(expression, shell_namespace)
+            if result is not None:
+                window.appendShellResult(repr(result) + '\n')
+
+    except Exception:
+        window.appendShellResult(traceback.format_exc())
+
+    finally:
+        sys.stdout = old_stdout
+        sys.stderr = old_stderr
+
+
+def run_brython_code():
+    window.resetOutputAreas()
+    window.setStatus('neutral', 'Running with Brython...')
+
+    user_code = window.document['editor'].value
+    namespace = {
+        '__name__': '__main__'
+    }
+
+    old_stdout = sys.stdout
+    old_stderr = sys.stderr
+
+    sys.stdout = OutputCatcher()
+    sys.stderr = OutputCatcher()
+
+    try:
+        exec(user_code, namespace)
+        window.setStatus('ok', 'Program finished with Brython.')
+        window.recordRunResult(True, 'Program finished with Brython.')
+
+    except Exception:
+        window.appendOutput(traceback.format_exc())
+        window.setStatus('bad', 'Python error.')
+        window.recordRunResult(False, 'Python error.')
+
+    finally:
+        sys.stdout = old_stdout
+        sys.stderr = old_stderr
+
+
+window.runBrythonCode = run_brython_code
+window.runBrythonShellCommand = run_brython_shell_command
+window.resetBrythonShell = reset_brython_shell
+  </script>
+</body>
+</html>
