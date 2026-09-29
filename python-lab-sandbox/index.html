@@ -1192,15 +1192,15 @@
 
       <div class="brand-text">
         <h1>GLM Python Lab</h1>
-        <p>Write code, run it, and see the result immediately. Sign in with your GLM account to save and resume each exercise.</p>
+        <p>Write code, run it, and see the result immediately. Open the school web app to save and resume each exercise.</p>
         <div class="header-badge">Student coding workspace</div>
       </div>
     </div>
 
     <div class="toolbar">
       <button class="primary" id="runButton" onclick="runCurrentWorkspace()">▶ Run Python</button>
-      <button class="success-button" id="saveRunButton" onclick="evaluateAndSaveProgress()">✓ Evaluate & Save</button>
-      <button class="secondary" id="saveDraftButton" onclick="saveManualProgress()">Save Draft</button>
+      <button class="success-button" id="saveRunButton" onclick="evaluateAndSaveProgress()" disabled>✓ Evaluate & Save</button>
+      <button class="secondary" id="saveDraftButton" onclick="saveManualProgress()" disabled>Save Draft</button>
       <button class="secondary" onclick="downloadPythonFile()">Download .py</button>
       <button class="secondary" onclick="copyCode()">Copy Code</button>
       <button class="danger" onclick="clearCurrentWorkspace()">Clear</button>
@@ -1219,20 +1219,15 @@
         <input id="studentEmail" type="email" readonly placeholder="Verified email appears here">
       </div>
 
-      <div class="quick-field" id="loginEmailField">
-        <label for="loginEmail">Sign in with school email</label>
-        <input id="loginEmail" type="email" autocomplete="email" placeholder="name@glm.edu.co">
-      </div>
-      <button class="primary" id="emailLinkButton" onclick="useEmailLink()">Email me a sign-in link</button>
-      <button class="secondary" id="signInButton" onclick="signInStudent()">Use Google account</button>
-      <button class="secondary" id="signOutButton" onclick="signOutStudent()" hidden>Sign out</button>
+      <button class="secondary" id="checkAccountButton" onclick="checkSchoolAccount()" hidden>Check school account</button>
       <button class="secondary" id="profileButton" onclick="saveStudentProfile()" hidden>Save name</button>
       <button class="secondary" id="loadProgressButton" onclick="loadMyProgress()" hidden>Load progress</button>
 
       <div class="quickbar-status">
         <div id="status" class="status neutral">Starting browser Python...</div>
       </div>
-      <span id="profilePill" class="pill" role="status">Signed out</span>
+      <span id="profilePill" class="pill" role="status">Checking account</span>
+      <p id="accountHelp" class="settings-note" style="flex-basis:100%;margin:0;">Checking school access...</p>
     </section>
 
     <div class="results-heading">
@@ -1430,8 +1425,51 @@ Type one Python command at a time. Your variables and functions stay available d
   </div>
 
 
-  <script type="module" src="./account.js"></script>
   <script>
+    // The same file runs as practice on GitHub Pages and as a signed-in
+    // Google Workspace web app when published through Apps Script.
+    (function () {
+      const available = typeof google !== 'undefined' && google.script && google.script.run;
+      function request(method, payload) {
+        if (!available) return Promise.reject(new Error('Open the school web app to save progress.'));
+        return new Promise(function (resolve, reject) {
+          const runner = google.script.run
+            .withSuccessHandler(function (response) {
+              if (!response || !response.ok) reject(new Error(response && response.message || 'Request failed.'));
+              else resolve(response);
+            })
+            .withFailureHandler(function (error) {
+              reject(new Error(error && error.message || String(error)));
+            });
+          if (payload === undefined) runner[method]();
+          else runner[method](payload);
+        });
+      }
+      window.pythonLabAccount = {
+        configured: Boolean(available),
+        ready: Boolean(available),
+        current: function () { return request('getCurrentStudent'); },
+        save: function (payload) { return request('submitStudentProgress', payload); },
+        load: function () { return request('getStudentProgress').then(function (result) { return result.progress; }); }
+      };
+    })();
+  </script>
+  <script>
+    const labStorage = (function () {
+      try {
+        const storage = window.localStorage;
+        storage.setItem('pythonLabStorageCheck', '1');
+        storage.removeItem('pythonLabStorageCheck');
+        return storage;
+      } catch (error) {
+        const values = {};
+        return {
+          getItem: function (key) { return Object.prototype.hasOwnProperty.call(values, key) ? values[key] : null; },
+          setItem: function (key, value) { values[key] = String(value); },
+          removeItem: function (key) { delete values[key]; }
+        };
+      }
+    })();
     const editor = document.getElementById('editor');
     const highlight = document.getElementById('highlight');
     const lineNumbers = document.getElementById('lineNumbers');
@@ -1456,7 +1494,6 @@ Type one Python command at a time. Your variables and functions stay available d
 
     const studentNameInput = document.getElementById('studentName');
     const studentEmailInput = document.getElementById('studentEmail');
-    const loginEmailInput = document.getElementById('loginEmail');
     const profilePill = document.getElementById('profilePill');
     const exerciseList = document.getElementById('exerciseList');
     const exerciseDetails = document.getElementById('exerciseDetails');
@@ -1472,7 +1509,7 @@ Type one Python command at a time. Your variables and functions stay available d
     let shellCaptureActive = false;
     let shellHistory = [];
     let shellHistoryIndex = 0;
-    let activeWorkspace = localStorage.getItem('pythonLabWorkspace') === 'shell'
+    let activeWorkspace = labStorage.getItem('pythonLabWorkspace') === 'shell'
       ? 'shell'
       : 'editor';
 
@@ -2487,7 +2524,8 @@ Type one Python command at a time. Your variables and functions stay available d
       setupBrowserGuiBridge();
       setupLearningPath();
       configureAccountControls();
-      engineSelect.value = localStorage.getItem('pythonIdeEngine') || 'brython';
+      checkSchoolAccount();
+      engineSelect.value = labStorage.getItem('pythonIdeEngine') || 'brython';
 
       updateEditor();
       changeEngine();
@@ -2569,7 +2607,7 @@ Type one Python command at a time. Your variables and functions stay available d
       updatePrimaryRunButton();
 
       if (remember !== false) {
-        localStorage.setItem('pythonLabWorkspace', activeWorkspace);
+        labStorage.setItem('pythonLabWorkspace', activeWorkspace);
       }
 
       window.setTimeout(function () {
@@ -2798,7 +2836,7 @@ Type one Python command at a time. Your variables and functions stay available d
 
     function changeEngine() {
       const engine = getEngine();
-      localStorage.setItem('pythonIdeEngine', engine);
+      labStorage.setItem('pythonIdeEngine', engine);
 
       if (engine === 'brython') {
         enginePill.textContent = 'Brython selected';
@@ -3015,7 +3053,7 @@ sys.modules["gui"] = gui
 
     function saveEditorDraft() {
       const key = draftKey(activeExerciseId);
-      if (key) localStorage.setItem(key, editor.value);
+      if (key) labStorage.setItem(key, editor.value);
     }
 
     function selectExercise(id, loadStarter) {
@@ -3043,7 +3081,7 @@ sys.modules["gui"] = gui
       engineSelect.value = exercise.engine;
       changeEngine();
       const key = draftKey(activeExerciseId);
-      const draft = key ? localStorage.getItem(key) : null;
+      const draft = key ? labStorage.getItem(key) : null;
       editor.value = loadStarter ? exercise.starter :
         draft !== null ? draft : saved && typeof saved.code === 'string' ? saved.code : exercise.starter;
       studentReflection.value = saved && saved.reflection || '';
@@ -3070,41 +3108,29 @@ sys.modules["gui"] = gui
     function configureAccountControls() {
       const bridge = window.pythonLabAccount;
       const available = Boolean(bridge && bridge.configured && bridge.ready);
-      document.getElementById('signInButton').disabled = !available;
-      document.getElementById('emailLinkButton').disabled = !available;
-      document.getElementById('emailLinkButton').textContent = bridge && bridge.emailLinkPending
-        ? 'Finish sign-in' : 'Email me a sign-in link';
-      if (bridge && bridge.emailLinkPending) {
-        setSaveStatus('neutral', 'Enter the school email that received your sign-in link.');
-      }
-      if (!bridge || !bridge.configured) {
-        setSaveStatus('neutral', 'Online accounts need setup. You can still practice and download your .py file.');
+      document.getElementById('checkAccountButton').hidden = !available;
+      document.getElementById('saveRunButton').disabled = !activeAccount;
+      document.getElementById('saveDraftButton').disabled = !activeAccount;
+      document.getElementById('accountHelp').textContent = available
+        ? 'Your school account is checked automatically. Progress is saved to the school results Sheet.'
+        : 'GitHub practice mode. Open the school Apps Script web app link provided by your teacher to save progress.';
+      if (!available) {
+        setSaveStatus('neutral', 'Practice mode: run Python or download your .py file. Online saving is available in the school web app.');
       }
     }
 
-    window.addEventListener('pythonlab-ready', configureAccountControls);
-    window.addEventListener('pythonlab-email-link-pending', function () {
-      configureAccountControls();
-      loginEmailInput.focus();
-    });
-    window.addEventListener('pythonlab-error', function (event) {
-      setSaveStatus('bad', 'Account service unavailable: ' + event.detail);
-    });
     window.addEventListener('pythonlab-auth', function (event) {
       const user = event.detail;
       const changedUser = (activeAccount && activeAccount.uid) !== (user && user.uid);
       activeAccount = user;
       studentEmailInput.value = user ? user.email : '';
       studentNameInput.value = user
-        ? localStorage.getItem('pythonLabName:' + user.uid) || user.name || ''
+        ? labStorage.getItem('pythonLabName:' + user.uid) || user.name || ''
         : '';
-      document.getElementById('loginEmailField').hidden = Boolean(user);
-      document.getElementById('emailLinkButton').hidden = Boolean(user);
-      document.getElementById('signInButton').hidden = Boolean(user);
-      document.getElementById('signOutButton').hidden = !user;
       document.getElementById('profileButton').hidden = !user;
       document.getElementById('loadProgressButton').hidden = !user;
       updateProfilePill();
+      configureAccountControls();
       if (changedUser) {
         localProgress = {};
         // Remove the previous student's code and results from the visible workspace.
@@ -3113,36 +3139,19 @@ sys.modules["gui"] = gui
         studentReflection.value = '';
         setupLearningPath();
         if (user) loadMyProgress();
-        else setSaveStatus('neutral', 'Signed out. Sign in to save or load progress.');
+        else setSaveStatus('bad', 'The school account could not be verified. Progress was not saved.');
       }
     });
 
-    async function useEmailLink() {
+    async function checkSchoolAccount() {
+      if (!window.pythonLabAccount.configured) return;
       try {
-        const bridge = window.pythonLabAccount;
-        if (bridge.emailLinkPending) {
-          await bridge.completeEmailLink(loginEmailInput.value);
-        } else {
-          await bridge.sendEmailLink(loginEmailInput.value);
-          setSaveStatus('ok', 'Check your school inbox and open the sign-in link.');
-        }
+        const response = await window.pythonLabAccount.current();
+        window.dispatchEvent(new CustomEvent('pythonlab-auth', { detail: {
+          uid: response.email, email: response.email, name: ''
+        }}));
       } catch (error) {
-        setSaveStatus('bad', error.message || String(error));
-      }
-    }
-
-    async function signInStudent() {
-      try {
-        await window.pythonLabAccount.signIn();
-      } catch (error) {
-        setSaveStatus('bad', error.message || String(error));
-      }
-    }
-
-    async function signOutStudent() {
-      try {
-        await window.pythonLabAccount.signOut();
-      } catch (error) {
+        window.dispatchEvent(new CustomEvent('pythonlab-auth', { detail: null }));
         setSaveStatus('bad', error.message || String(error));
       }
     }
@@ -3153,7 +3162,7 @@ sys.modules["gui"] = gui
         setSaveStatus('bad', validation.message);
         return false;
       }
-      localStorage.setItem('pythonLabName:' + activeAccount.uid, validation.name);
+      labStorage.setItem('pythonLabName:' + activeAccount.uid, validation.name);
       setSaveStatus('ok', 'Name saved for this browser. Your work is saved when you use Save Draft or Evaluate & Save.');
       return true;
     }
@@ -3166,7 +3175,7 @@ sys.modules["gui"] = gui
 
     function validateStudentProfile() {
       if (!activeAccount) {
-        return { ok: false, message: 'Sign in with your school email before saving.' };
+        return { ok: false, message: 'Open the school web app with your @glm.edu.co account before saving.' };
       }
       const name = studentNameInput.value.trim();
       if (name.length < 3 || name.length > 120) {
@@ -3335,8 +3344,8 @@ sys.modules["gui"] = gui
         setSaveStatus('bad', 'Could not save: ' + (error.message || String(error)));
       } finally {
         savingProgress = false;
-        document.getElementById('saveDraftButton').disabled = false;
-        document.getElementById('saveRunButton').disabled = false;
+        document.getElementById('saveDraftButton').disabled = !activeAccount;
+        document.getElementById('saveRunButton').disabled = !activeAccount;
       }
     }
 
@@ -3362,7 +3371,7 @@ sys.modules["gui"] = gui
 
     async function loadMyProgress() {
       if (!activeAccount) {
-        setSaveStatus('bad', 'Sign in with your GLM Google account first.');
+        setSaveStatus('bad', 'Open the school web app with your @glm.edu.co account first.');
         return;
       }
       const accountAtStart = activeAccount.uid;

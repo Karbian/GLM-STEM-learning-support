@@ -1,36 +1,28 @@
 # GLM Python Lab · Sandbox
 
-A GitHub Pages version of the supplied Python Sandbox. It preserves the browser Python workspace, the Brython and Pyodide engines, GUI and plot previews, and the 50 learning path exercises. The exercises open with a blank editor, and automatic feedback does not disclose exact expected outputs. Students can run code without signing in. Once configured, they can sign in with their school Google account **or** receive a one-time sign-in link at their `@glm.edu.co` email to save and reload work from Cloud Firestore.
+The 50-exercise Python workspace runs on GitHub Pages for practice. A domain-restricted **Google Apps Script web app** provides school sign-in and saves progress to Google Sheets. No Firebase project, student password form, or student access to the results Sheet is needed.
 
-## What is stored
+## How student sign-in works
 
-The student clicks **Save Draft** or **Evaluate & Save**. The latest record for each exercise is stored at `students/{firebaseUid}/progress/{exerciseId}` with code, output, status, feedback, reflection, score, attempt count, and save time. A student can read and update only their own progress. The browser also keeps unsent editor drafts under keys specific to that signed-in account and exercise; use **Save Draft** to make a draft available on another device.
+Students open the Apps Script `/exec` URL while signed into their `@glm.edu.co` Google Workspace account. The web app is restricted to the deployer's domain and runs with the school deployer's authority. Each save and load operation gets the active student's email from `Session.getActiveUser().getEmail()` on the server. A typed browser email is never used to identify a student. If Google does not provide the email, the operation fails without saving.
 
-The automatic exercise checks run in the student's browser and are formative feedback. Scores and statuses are client-generated; they are **not authenticated assessment results**. Review code and reasoning before assigning a grade.
+Google documents that the active email can be blank for web apps running as the deployer, while the same Workspace domain is generally an exception. **Test this with two real student accounts before assigning work.** Deploy from an `@glm.edu.co` account, not a personal Gmail account.
 
-## Enable student accounts
+The GitHub Pages copy cannot authenticate or save progress: use it for practice and share the Apps Script URL for saved work. The two copies use the same `index.html` source.
 
-1. Create a Firebase project owned by the school or an approved institutional administrator. Decide the school's retention and data policy before uploading student work.
-2. In **Authentication → Sign-in method**, enable the **Google** provider and the **Email/Password** and **Email link (passwordless sign-in)** options. In **Authentication → Settings → Authorized domains**, add the Pages host `karbian.github.io` (or your custom domain). Students using email links must open the link in the browser and confirm the receiving address; a link can be completed on another device. The app and rules check the verified `@glm.edu.co` address. Google's account picker domain hint alone is not access control.
-3. Create a **Cloud Firestore** database. Publish the complete contents of `firestore.rules` in **Firestore Database → Rules**. Do this before students sign in; do not leave Firestore in test mode. These rules grant access only to the verified Google account's own records.
-4. In **Project settings → Your apps**, register a Web app and copy its public config fields into `firebase-config.js`: `apiKey`, `authDomain`, `projectId`, and `appId`. Do not add service account keys, private keys, or admin credentials to this repository. Firebase's web config is public; access depends on the rules.
-5. Commit the config update. Visit the Pages URL, sign in with a school test account using each method, save one draft, refresh, and click **Load progress**. Test with a second school account: it must not see the first account's code. An outside account must be rejected.
+## Deploy from the school account
 
-Until steps 1–4 are complete, the sandbox still runs Python but displays **Online accounts need setup**. It does not claim that a browser-only save has been sent to the cloud.
+1. Open an existing Apps Script project associated with the school's Python Lab results Sheet, or create a new Apps Script project while signed in as an `@glm.edu.co` account. Back up existing script files before replacing them.
+2. Replace the project's `Code.gs` with this folder's `Code.gs`. Create an HTML file named **Index** and paste the contents of `index.html` into it. In **Project Settings**, enable viewing the `appsscript.json` manifest and replace it with the included `appsscript.json`.
+3. If reusing a results spreadsheet, set `CONFIG.SPREADSHEET_ID` in `Code.gs` to its ID. Leave it blank to use a bound Sheet or let the script create a new one. The columns match the earlier `Python Lab Results` sheet. Run `setupTeacherSheet_` from the Apps Script editor as the school deployer and authorize the requested scopes. The returned Sheet URL is for the teacher; do not share it with students.
+4. Choose **Deploy → New deployment → Web app**. Set **Execute as: Me** (the school deployer) and **Who has access: Anyone within the domain**. Confirm the manifest uses `USER_DEPLOYING` and `DOMAIN`. Copy the deployed `/exec` URL.
+5. Open that URL with a test student account. The verified email should appear automatically. Enter the student's name, write a small program, click **Save Draft**, then reload and click **Load progress**. Repeat with a second student account and confirm it cannot load the first student's code. Also verify that an outside account cannot open the app.
+6. Share the `/exec` URL in Schoology. Redeploy a new version after code changes. The GitHub Pages copy at `https://karbian.github.io/GLM-STEM-learning-support/python-lab-sandbox/` remains a practice-only workspace.
 
-## Publish on GitHub Pages
+If the school does not offer the domain access option or the active student email is blank, stop rollout. The app deliberately refuses to save in that state. An administrator can review Workspace deployment settings, or the project can move to a different verified backend.
 
-This project is in `python-lab-sandbox/` of [GLM-STEM-learning-support](https://github.com/Karbian/GLM-STEM-learning-support). In that repository, choose **Settings → Pages → Deploy from a branch → main → /(root)**. Once Pages is active, open `https://karbian.github.io/GLM-STEM-learning-support/python-lab-sandbox/`. You may also copy the folder contents to the root of a dedicated repository and set Pages to `main / (root)`. GitHub Pages hosts the public interface; Firebase Authentication and Firestore provide accounts and private storage.
+## Data and assessment
 
-No build command is required. For local testing, serve the folder over HTTP (for example, `python3 -m http.server 8000` in this directory). Firebase Authentication may require adding `localhost` to the authorized domains for development.
+The backend appends an attempt to `Python Lab Results` for each **Save Draft** or **Evaluate & Save** action. It stores code, output, status, feedback, reflection, score, and the authenticated school email. Load progress returns the latest attempt for each exercise for that same email. The teacher's Sheet is not shared with students.
 
-## Existing Apps Script data
-
-The uploaded Apps Script backend appended attempts to a Google Sheet and looked up records by a typed email address. The GitHub version uses verified sign-in and a separate Firestore store. **Existing Sheet rows are not migrated**, and this project does not modify the original Apps Script deployment. Keep the Sheet for historical reporting until an approved migration maps each student email to its Firebase UID. The new Firestore rules provide no teacher dashboard or cross-student reads; a future teacher report needs a separate authorized server-side process.
-
-## Security notes
-
-- Restrict access in `firestore.rules`, not in visible JavaScript. The Firebase project must use those rules as written. The exact checks remain in the downloaded client code for formative evaluation; they are not protected exam answers. Move grading to a controlled server if these exercises become summative assessments.
-- Students' code is executed in their own browser. Third-party Python packages and the supplied Brython/Pyodide runtimes load from public CDNs; advanced exercises may fetch packages.
-- The account selector may create a Firebase Authentication user for a non-school Google account before the app rejects it, but Firestore rules deny that account student-data access. An administrator can clean up such unused Authentication users.
-- Local drafts may remain on a shared computer under the account's UID. Students should sign out and use **Save Draft** before switching devices; school devices should clear browser data according to school policy.
+All 50 exercises open with an empty editor. The former worked examples and exact-answer feedback were removed. Automatic checks still live in public browser code and generate formative feedback only; review the student's code and reasoning before grading. The GitHub repository is the source archive for the school-hosted web app, not the private data store.
